@@ -100,6 +100,9 @@ let moveNumber = 1;
 
 let lastThreeMoves = [];
 
+/* NUEVO: movimientos para dibujar en la cuadrícula */
+let gridMoves = [];
+
 
 /* =========================================================
    IA VS IA
@@ -199,20 +202,27 @@ function renderBoard() {
 
         for (let col = 0; col < 8; col++) {
 
-            const square = document.createElement("div");
-
-            square.classList.add("chess-square");
-
-            const isLight = (row + col) % 2 === 0;
+            const square =
+                document.createElement("div");
 
             square.classList.add(
-                isLight ? "light-square" : "dark-square"
+                "chess-square"
+            );
+
+            const isLight =
+                (row + col) % 2 === 0;
+
+            square.classList.add(
+                isLight
+                    ? "light-square"
+                    : "dark-square"
             );
 
             square.dataset.row = row;
             square.dataset.col = col;
 
-            const piece = board[row][col];
+            const piece =
+                board[row][col];
 
             if (piece) {
 
@@ -227,7 +237,9 @@ function renderBoard() {
                 pieceElement.textContent =
                     PIECES[piece.color][piece.type];
 
-                square.appendChild(pieceElement);
+                square.appendChild(
+                    pieceElement
+                );
 
             }
 
@@ -242,13 +254,12 @@ function renderBoard() {
 
     }
 
-    /*
-       Volvemos a dibujar las flechas después
-       de reconstruir el tablero.
-    */
 
     requestAnimationFrame(() => {
+
         drawAllMoveArrows();
+        drawGridMoves();
+
     });
 
 }
@@ -262,6 +273,9 @@ function addMoveArrow(from, to) {
 
     if (!from || !to) return;
 
+
+    /* Flechas del tablero */
+
     lastThreeMoves.push({
 
         fromRow: from.row,
@@ -272,6 +286,7 @@ function addMoveArrow(from, to) {
 
     });
 
+
     /* Mantener solamente las últimas 3 */
 
     if (lastThreeMoves.length > 3) {
@@ -280,7 +295,23 @@ function addMoveArrow(from, to) {
 
     }
 
+
+    /* NUEVO: guardar todos los movimientos
+       para dibujarlos en la cuadrícula */
+
+    gridMoves.push({
+
+        fromRow: from.row,
+        fromCol: from.col,
+
+        toRow: to.row,
+        toCol: to.col
+
+    });
+
+
     drawAllMoveArrows();
+    drawGridMoves();
 
 }
 
@@ -311,8 +342,10 @@ function drawAllMoveArrows() {
 
     }
 
+
     const dpr =
         window.devicePixelRatio || 1;
+
 
     canvas.width =
         rect.width * dpr;
@@ -320,14 +353,17 @@ function drawAllMoveArrows() {
     canvas.height =
         rect.height * dpr;
 
+
     canvas.style.width =
         `${rect.width}px`;
 
     canvas.style.height =
         `${rect.height}px`;
 
+
     const ctx =
         canvas.getContext("2d");
+
 
     ctx.setTransform(
         dpr,
@@ -338,12 +374,14 @@ function drawAllMoveArrows() {
         0
     );
 
+
     ctx.clearRect(
         0,
         0,
         rect.width,
         rect.height
     );
+
 
     const squareWidth =
         rect.width / 8;
@@ -385,10 +423,6 @@ function drawAllMoveArrows() {
             );
 
 
-        /*
-           LÍNEA
-        */
-
         ctx.beginPath();
 
         ctx.moveTo(
@@ -415,9 +449,7 @@ function drawAllMoveArrows() {
         ctx.stroke();
 
 
-        /*
-           PUNTA DE LA FLECHA
-        */
+        /* Punta de la flecha */
 
         ctx.beginPath();
 
@@ -467,7 +499,273 @@ function drawAllMoveArrows() {
 
 
 /* =========================================================
-   ACTUALIZAR TAMAÑO DE LAS FLECHAS
+   DIBUJAR MOVIMIENTOS EN LA CUADRÍCULA
+========================================================= */
+
+function drawGridMoves() {
+
+    const canvas =
+        document.getElementById("gridBoard");
+
+    if (!canvas) return;
+
+
+    const rect =
+        canvas.getBoundingClientRect();
+
+    const width =
+        rect.width;
+
+    const height =
+        rect.height;
+
+
+    if (
+        width <= 0 ||
+        height <= 0
+    ) {
+
+        return;
+
+    }
+
+
+    const dpr =
+        window.devicePixelRatio || 1;
+
+
+    canvas.width =
+        width * dpr;
+
+    canvas.height =
+        height * dpr;
+
+
+    const ctx =
+        canvas.getContext("2d");
+
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
+
+    ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    const margenIzq = 35;
+    const margenArriba = 20;
+    const margenDer = 15;
+    const margenAbajo = 30;
+
+
+    const ancho =
+        width -
+        margenIzq -
+        margenDer;
+
+    const alto =
+        height -
+        margenArriba -
+        margenAbajo;
+
+
+    const pasoX =
+        ancho / 7;
+
+    const pasoY =
+        alto / 7;
+
+
+    /* PUNTOS */
+
+    ctx.fillStyle =
+        "#ffffff";
+
+
+    for (
+        let fila = 0;
+        fila < 8;
+        fila++
+    ) {
+
+        for (
+            let col = 0;
+            col < 8;
+            col++
+        ) {
+
+            const x =
+                margenIzq +
+                col * pasoX;
+
+            const y =
+                margenArriba +
+                fila * pasoY;
+
+
+            ctx.beginPath();
+
+            ctx.arc(
+                x,
+                y,
+                2,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+        }
+
+    }
+
+
+    /* NÚMEROS */
+
+    ctx.fillStyle =
+        "#ffffff";
+
+    ctx.font =
+        "12px Arial";
+
+    ctx.textAlign =
+        "center";
+
+    ctx.textBaseline =
+        "middle";
+
+
+    for (
+        let fila = 0;
+        fila < 8;
+        fila++
+    ) {
+
+        ctx.fillText(
+            8 - fila,
+            15,
+            margenArriba +
+            fila * pasoY
+        );
+
+    }
+
+
+    for (
+        let col = 0;
+        col < 8;
+        col++
+    ) {
+
+        ctx.fillText(
+            col + 1,
+            margenIzq +
+            col * pasoX,
+            height - 10
+        );
+
+    }
+
+
+    /* EJES */
+
+    ctx.strokeStyle =
+        "#ffffff";
+
+    ctx.lineWidth = 1;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        margenIzq - 12,
+        margenArriba - 5
+    );
+
+    ctx.lineTo(
+        margenIzq - 12,
+        margenArriba + alto + 5
+    );
+
+    ctx.stroke();
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        margenIzq - 5,
+        margenArriba + alto + 12
+    );
+
+    ctx.lineTo(
+        margenIzq + ancho + 5,
+        margenArriba + alto + 12
+    );
+
+    ctx.stroke();
+
+
+    /* LÍNEAS DE LOS MOVIMIENTOS */
+
+    gridMoves.forEach(move => {
+
+        const inicioX =
+            margenIzq +
+            move.fromCol * pasoX;
+
+        const inicioY =
+            margenArriba +
+            move.fromRow * pasoY;
+
+        const finalX =
+            margenIzq +
+            move.toCol * pasoX;
+
+        const finalY =
+            margenArriba +
+            move.toRow * pasoY;
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            inicioX,
+            inicioY
+        );
+
+        ctx.lineTo(
+            finalX,
+            finalY
+        );
+
+        ctx.strokeStyle =
+            "#ffd000";
+
+        ctx.lineWidth = 3;
+
+        ctx.lineCap =
+            "round";
+
+        ctx.stroke();
+
+    });
+
+}
+
+
+/* =========================================================
+   ACTUALIZAR TAMAÑO
 ========================================================= */
 
 window.addEventListener(
@@ -475,7 +773,12 @@ window.addEventListener(
     () => {
 
         setTimeout(
-            drawAllMoveArrows,
+            () => {
+
+                drawAllMoveArrows();
+                drawGridMoves();
+
+            },
             100
         );
 
@@ -497,10 +800,6 @@ function handleSquareClick(row, col) {
         board[row][col];
 
 
-    /*
-       SI NO HAY PIEZA SELECCIONADA
-    */
-
     if (!selectedSquare) {
 
         if (
@@ -517,26 +816,26 @@ function handleSquareClick(row, col) {
 
         }
 
+
         selectedSquare = {
             row,
             col
         };
 
+
         highlightSelectedSquare();
+
 
         showPossibleMoves(
             row,
             col
         );
 
+
         return;
 
     }
 
-
-    /*
-       CLICK SOBRE OTRA PIEZA PROPIA
-    */
 
     if (
         piece &&
@@ -548,23 +847,22 @@ function handleSquareClick(row, col) {
             col
         };
 
+
         clearHighlights();
 
         highlightSelectedSquare();
+
 
         showPossibleMoves(
             row,
             col
         );
 
+
         return;
 
     }
 
-
-    /*
-       INTENTAR MOVER
-    */
 
     const from =
         selectedSquare;
@@ -587,19 +885,17 @@ function handleSquareClick(row, col) {
             "Ese movimiento no es válido para esa pieza."
         );
 
+
         highlightErrorSquare(
             row,
             col
         );
 
+
         return;
 
     }
 
-
-    /*
-       MOVIMIENTO CORRECTO
-    */
 
     makePlayerMove(
         from,
@@ -636,10 +932,6 @@ function makePlayerMove(from, to) {
     board[from.row][from.col] =
         null;
 
-
-    /*
-       AGREGAR FLECHA
-    */
 
     addMoveArrow(
         from,
@@ -688,7 +980,6 @@ function makePlayerMove(from, to) {
 
     clearHighlights();
 
-
     renderBoard();
 
 
@@ -707,8 +998,6 @@ function makePlayerMove(from, to) {
     );
 
 }
-
-
 /* =========================================================
    MOVIMIENTO IA
 ========================================================= */
@@ -785,9 +1074,7 @@ function makeAIMove() {
         null;
 
 
-    /*
-       AGREGAR FLECHA DE LA IA
-    */
+    /* AGREGAR FLECHA Y LÍNEA EN LA CUADRÍCULA */
 
     addMoveArrow(
         selectedMove.from,
@@ -816,18 +1103,16 @@ function makeAIMove() {
 
     clearHighlights();
 
-
     renderBoard();
 
 
-    /*
-       RESALTAR CASILLAS DEL MOVIMIENTO IA
-    */
+    /* RESALTAR MOVIMIENTO DE LA IA */
 
     highlightAISquare(
         selectedMove.from.row,
         selectedMove.from.col
     );
+
 
     highlightAISquare(
         selectedMove.to.row,
@@ -877,9 +1162,7 @@ function chooseAIMove(moves) {
     }
 
 
-    /*
-       FÁCIL
-    */
+    /* FÁCIL */
 
     if (
         difficulty === "easy"
@@ -895,9 +1178,7 @@ function chooseAIMove(moves) {
     }
 
 
-    /*
-       MEDIO
-    */
+    /* MEDIO */
 
     if (
         difficulty === "medium"
@@ -939,9 +1220,7 @@ function chooseAIMove(moves) {
     }
 
 
-    /*
-       DIFÍCIL
-    */
+    /* DIFÍCIL */
 
     if (
         difficulty === "hard"
@@ -993,9 +1272,7 @@ function chooseAIMove(moves) {
     }
 
 
-    /*
-       EXPERTO
-    */
+    /* EXPERTO */
 
     if (
         difficulty === "expert"
@@ -1378,9 +1655,7 @@ function isPawnMove(
         ];
 
 
-    /*
-       AVANCE
-    */
+    /* AVANCE */
 
     if (
         colDiff === 0 &&
@@ -1393,9 +1668,7 @@ function isPawnMove(
     }
 
 
-    /*
-       DOBLE AVANCE
-    */
+    /* DOBLE AVANCE */
 
     if (
         colDiff === 0 &&
@@ -1414,9 +1687,7 @@ function isPawnMove(
     }
 
 
-    /*
-       CAPTURA
-    */
+    /* CAPTURA */
 
     if (
         Math.abs(colDiff) === 1 &&
@@ -1479,7 +1750,6 @@ function isPathClear(
 
 
         row += rowStep;
-
         col += colStep;
 
     }
@@ -1491,7 +1761,7 @@ function isPathClear(
 
 
 /* =========================================================
-   OBTENER TODOS LOS MOVIMIENTOS
+   OBTENER TODOS LOS MOVIMIENTOS LEGALES
 ========================================================= */
 
 function getAllLegalMoves(
@@ -1540,32 +1810,28 @@ function getAllLegalMoves(
                     targetCol++
                 ) {
 
+                    const from = {
+                        row,
+                        col
+                    };
+
+                    const to = {
+                        row: targetRow,
+                        col: targetCol
+                    };
+
+
                     if (
                         isLegalMove(
                             position,
-                            {
-                                row,
-                                col
-                            },
-                            {
-                                row: targetRow,
-                                col: targetCol
-                            }
+                            from,
+                            to
                         )
                     ) {
 
                         moves.push({
-
-                            from: {
-                                row,
-                                col
-                            },
-
-                            to: {
-                                row: targetRow,
-                                col: targetCol
-                            }
-
+                            from,
+                            to
                         });
 
                     }
@@ -1582,8 +1848,6 @@ function getAllLegalMoves(
     return moves;
 
 }
-
-
 /* =========================================================
    RESALTAR PIEZA SELECCIONADA
 ========================================================= */
@@ -1592,21 +1856,17 @@ function highlightSelectedSquare() {
 
     if (!selectedSquare) return;
 
-
     const square =
         getSquare(
             selectedSquare.row,
             selectedSquare.col
         );
 
-
     if (!square) return;
-
 
     square.classList.add(
         "selected-square"
     );
-
 }
 
 
@@ -1625,13 +1885,12 @@ function showPossibleMoves(
             "white"
         );
 
-
     moves.forEach(
         move => {
 
             if (
                 move.from.row === row &&
-                move.from.col === col
+                               move.from.col === col
             ) {
 
                 const square =
@@ -1640,14 +1899,11 @@ function showPossibleMoves(
                         move.to.col
                     );
 
-
                 if (!square) return;
-
 
                 square.classList.add(
                     "possible-move"
                 );
-
 
                 if (
                     board[
@@ -1686,14 +1942,11 @@ function highlightErrorSquare(
             col
         );
 
-
     if (!square) return;
-
 
     square.classList.add(
         "error-square"
     );
-
 
     setTimeout(
         () => {
@@ -1724,14 +1977,11 @@ function highlightAISquare(
             col
         );
 
-
     if (!square) return;
-
 
     square.classList.add(
         "ai-move-highlight"
     );
-
 
     setTimeout(
         () => {
@@ -1754,7 +2004,6 @@ function highlightAISquare(
 function clearHighlights() {
 
     if (!chessBoard) return;
-
 
     chessBoard
         .querySelectorAll(
@@ -1786,7 +2035,6 @@ function getSquare(
 
     if (!chessBoard) return null;
 
-
     return chessBoard.querySelector(
         `[data-row="${row}"][data-col="${col}"]`
     );
@@ -1804,7 +2052,6 @@ function updateGameMessage(
 
     if (!gameMessageText) return;
 
-
     gameMessageText.textContent =
         message;
 
@@ -1820,15 +2067,12 @@ function showMessage(
         message
     );
 
-
     if (!gameMessage) return;
-
 
     gameMessage.classList.remove(
         "success",
         "error"
     );
-
 
     if (type) {
 
@@ -1854,18 +2098,15 @@ function showError(
         "error"
     );
 
-
     const modal =
         document.getElementById(
             "errorModal"
         );
 
-
     const modalText =
         document.getElementById(
             "errorModalText"
         );
-
 
     if (modalText) {
 
@@ -1873,7 +2114,6 @@ function showError(
             message;
 
     }
-
 
     if (modal) {
 
@@ -1898,9 +2138,7 @@ function showAnalysis(
 
     if (!analysisContent) return;
 
-
     let icon = "♟";
-
 
     if (
         type === "success"
@@ -1910,7 +2148,6 @@ function showAnalysis(
 
     }
 
-
     if (
         type === "ai"
     ) {
@@ -1918,7 +2155,6 @@ function showAnalysis(
         icon = "🤖";
 
     }
-
 
     analysisContent.innerHTML = `
 
@@ -1958,12 +2194,10 @@ function addMoveToHistory(
 
     if (!moveHistory) return;
 
-
     const empty =
         moveHistory.querySelector(
             ".history-empty"
         );
-
 
     if (empty) {
 
@@ -1971,47 +2205,38 @@ function addMoveToHistory(
 
     }
 
-
     const moveElement =
         document.createElement(
             "div"
         );
 
-
     moveElement.classList.add(
         "history-move"
     );
-
 
     const number =
         document.createElement(
             "span"
         );
 
-
     number.classList.add(
         "move-number"
     );
 
-
     number.textContent =
         moveNumber + ".";
-
 
     const text =
         document.createElement(
             "span"
         );
 
-
     text.classList.add(
         "move-text"
     );
 
-
     text.textContent =
         move;
-
 
     if (
         player === "ai"
@@ -2023,21 +2248,17 @@ function addMoveToHistory(
 
     }
 
-
     moveElement.appendChild(
         number
     );
-
 
     moveElement.appendChild(
         text
     );
 
-
     moveHistory.appendChild(
         moveElement
     );
-
 
     if (
         player === "ai"
@@ -2046,7 +2267,6 @@ function addMoveToHistory(
         moveNumber++;
 
     }
-
 
     moveHistory.scrollTop =
         moveHistory.scrollHeight;
@@ -2075,16 +2295,13 @@ function createMoveNotation(
         "h"
     ];
 
-
     const fromSquare =
         files[from.col] +
         (8 - from.row);
 
-
     const toSquare =
         files[to.col] +
         (8 - to.row);
-
 
     const symbols = {
 
@@ -2096,7 +2313,6 @@ function createMoveNotation(
         pawn: ""
 
     };
-
 
     return (
         symbols[piece.type] +
@@ -2122,61 +2338,34 @@ function getPieceName(
         knight: "caballo",
         bishop: "alfil",
         rook: "torre",
-        queen: "dama",
+        queen: "reina",
         king: "rey"
 
     };
 
-
-    return names[type] ||
-        "pieza";
+    return names[type] || type;
 
 }
-
-
 /* =========================================================
    ACTUALIZAR PUNTUACIONES
 ========================================================= */
 
 function updateScores() {
 
-    if (
-        playerScoreElement
-    ) {
-
-        playerScoreElement.textContent =
-            playerScore;
-
+    if (playerScoreElement) {
+        playerScoreElement.textContent = playerScore;
     }
 
-
-    if (
-        aiScoreElement
-    ) {
-
-        aiScoreElement.textContent =
-            aiScore;
-
+    if (aiScoreElement) {
+        aiScoreElement.textContent = aiScore;
     }
 
-
-    if (
-        scorePlayer
-    ) {
-
-        scorePlayer.textContent =
-            playerScore;
-
+    if (scorePlayer) {
+        scorePlayer.textContent = playerScore;
     }
 
-
-    if (
-        scoreAI
-    ) {
-
-        scoreAI.textContent =
-            aiScore;
-
+    if (scoreAI) {
+        scoreAI.textContent = aiScore;
     }
 
 }
@@ -2186,49 +2375,31 @@ function updateScores() {
    DIFICULTAD
 ========================================================= */
 
-function setDifficulty(
-    level
-) {
+function setDifficulty(level) {
 
-    difficulty =
-        level;
-
+    difficulty = level;
 
     const names = {
-
         easy: "Nivel fácil",
         medium: "Nivel medio",
         hard: "Nivel difícil",
         expert: "Nivel experto"
-
     };
 
-
-    if (
-        aiDifficultyLabel
-    ) {
-
-        aiDifficultyLabel.textContent =
-            names[level];
-
+    if (aiDifficultyLabel) {
+        aiDifficultyLabel.textContent = names[level];
     }
 
-
     document
-        .querySelectorAll(
-            ".difficulty-button"
-        )
-        .forEach(
-            button => {
+        .querySelectorAll(".difficulty-button")
+        .forEach(button => {
 
-                button.classList.toggle(
-                    "active",
-                    button.dataset.difficulty === level
-                );
+            button.classList.toggle(
+                "active",
+                button.dataset.difficulty === level
+            );
 
-            }
-        );
-
+        });
 
     showMessage(
         `Dificultad cambiada a ${names[level]}.`
@@ -2244,29 +2415,18 @@ function setDifficulty(
 function updateSpeed() {
 
     const slider =
-        document.getElementById(
-            "speedSlider"
-        );
-
+        document.getElementById("speedSlider");
 
     if (!slider) return;
 
-
     const value =
-        Number(
-            slider.value
-        );
-
+        Number(slider.value);
 
     aiSpeed =
         value * 1000;
 
-
     const speedValue =
-        document.getElementById(
-            "speedValue"
-        );
-
+        document.getElementById("speedValue");
 
     if (speedValue) {
 
@@ -2286,35 +2446,25 @@ function startAIGame() {
 
     stopAIGame();
 
-
     aiBoard =
         createInitialBoard();
-
 
     aiTurn =
         "white";
 
-
     aiPlaying =
         true;
-
 
     aiPaused =
         false;
 
-
     aiMoveCount =
         0;
 
-
     renderAIBoard();
 
-
     const status =
-        document.getElementById(
-            "aiGameStatus"
-        );
-
+        document.getElementById("aiGameStatus");
 
     if (status) {
 
@@ -2323,12 +2473,8 @@ function startAIGame() {
 
     }
 
-
     const startButton =
-        document.getElementById(
-            "startAIButton"
-        );
-
+        document.getElementById("startAIButton");
 
     if (startButton) {
 
@@ -2336,7 +2482,6 @@ function startAIGame() {
             "⟳ Partida en curso";
 
     }
-
 
     runAIMove();
 
@@ -2350,9 +2495,7 @@ function startAIGame() {
 function runAIMove() {
 
     if (!aiPlaying) return;
-
     if (aiPaused) return;
-
 
     const possibleMoves =
         getAllLegalMoves(
@@ -2360,17 +2503,12 @@ function runAIMove() {
             aiTurn
         );
 
-
-    if (
-        possibleMoves.length === 0
-    ) {
+    if (possibleMoves.length === 0) {
 
         finishAIGame();
-
         return;
 
     }
-
 
     const move =
         chooseAIMoveForSimulation(
@@ -2378,21 +2516,17 @@ function runAIMove() {
             aiTurn
         );
 
-
     if (!move) {
 
         finishAIGame();
-
         return;
 
     }
-
 
     showAIThinking(
         aiTurn,
         true
     );
-
 
     const thinkingTime =
         Math.min(
@@ -2403,7 +2537,6 @@ function runAIMove() {
             )
         );
 
-
     setTimeout(
         () => {
 
@@ -2411,61 +2544,36 @@ function runAIMove() {
                 !aiPlaying ||
                 aiPaused
             ) {
-
                 return;
-
             }
 
-
             const piece =
-                aiBoard[
-                    move.from.row
-                ][
-                    move.from.col
-                ];
-
+                aiBoard[move.from.row][move.from.col];
 
             const captured =
-                aiBoard[
-                    move.to.row
-                ][
-                    move.to.col
-                ];
+                aiBoard[move.to.row][move.to.col];
 
 
-            aiBoard[
-                move.to.row
-            ][
-                move.to.col
-            ] =
+            aiBoard[move.to.row][move.to.col] =
                 piece;
 
-
-            aiBoard[
-                move.from.row
-            ][
-                move.from.col
-            ] =
+            aiBoard[move.from.row][move.from.col] =
                 null;
 
 
             aiMoveCount++;
 
-
             renderAIBoard();
-
 
             highlightAISimulationMove(
                 move
             );
-
 
             updateCurrentAIMove(
                 piece,
                 move,
                 captured
             );
-
 
             showAIThinking(
                 aiTurn,
@@ -2483,7 +2591,6 @@ function runAIMove() {
                 document.getElementById(
                     "aiGameStatus"
                 );
-
 
             if (status) {
 
@@ -2517,12 +2624,8 @@ function chooseAIMoveForSimulation(
     color
 ) {
 
-    if (
-        !moves.length
-    ) {
-
+    if (!moves.length) {
         return null;
-
     }
 
 
@@ -2573,27 +2676,15 @@ function renderAIBoard() {
 
     if (!aiChessBoard) return;
 
-
     aiChessBoard.innerHTML = "";
 
 
-    for (
-        let row = 0;
-        row < 8;
-        row++
-    ) {
+    for (let row = 0; row < 8; row++) {
 
-        for (
-            let col = 0;
-            col < 8;
-            col++
-        ) {
+        for (let col = 0; col < 8; col++) {
 
             const square =
-                document.createElement(
-                    "div"
-                );
-
+                document.createElement("div");
 
             square.classList.add(
                 "chess-square"
@@ -2611,12 +2702,8 @@ function renderAIBoard() {
             );
 
 
-            square.dataset.row =
-                row;
-
-
-            square.dataset.col =
-                col;
+            square.dataset.row = row;
+            square.dataset.col = col;
 
 
             const piece =
@@ -2626,24 +2713,15 @@ function renderAIBoard() {
             if (piece) {
 
                 const pieceElement =
-                    document.createElement(
-                        "span"
-                    );
-
+                    document.createElement("span");
 
                 pieceElement.classList.add(
                     "chess-piece",
                     piece.color
                 );
 
-
                 pieceElement.textContent =
-                    PIECES[
-                        piece.color
-                    ][
-                        piece.type
-                    ];
-
+                    PIECES[piece.color][piece.type];
 
                 square.appendChild(
                     pieceElement
@@ -2667,9 +2745,7 @@ function renderAIBoard() {
    RESALTAR MOVIMIENTO IA VS IA
 ========================================================= */
 
-function highlightAISimulationMove(
-    move
-) {
+function highlightAISimulationMove(move) {
 
     if (!aiChessBoard) return;
 
@@ -2687,20 +2763,11 @@ function highlightAISimulationMove(
 
 
     if (from) {
-
-        from.classList.add(
-            "ai-move-highlight"
-        );
-
+        from.classList.add("ai-move-highlight");
     }
 
-
     if (to) {
-
-        to.classList.add(
-            "ai-move-highlight"
-        );
-
+        to.classList.add("ai-move-highlight");
     }
 
 
@@ -2708,20 +2775,15 @@ function highlightAISimulationMove(
         () => {
 
             if (from) {
-
                 from.classList.remove(
                     "ai-move-highlight"
                 );
-
             }
 
-
             if (to) {
-
                 to.classList.remove(
                     "ai-move-highlight"
                 );
-
             }
 
         },
@@ -2749,12 +2811,10 @@ function updateCurrentAIMove(
             "currentMovePiece"
         );
 
-
     const textElement =
         document.getElementById(
             "currentMoveText"
         );
-
 
     const descriptionElement =
         document.getElementById(
@@ -2765,11 +2825,7 @@ function updateCurrentAIMove(
     if (pieceElement) {
 
         pieceElement.textContent =
-            PIECES[
-                piece.color
-            ][
-                piece.type
-            ];
+            PIECES[piece.color][piece.type];
 
     }
 
@@ -2783,16 +2839,11 @@ function updateCurrentAIMove(
 
 
     if (textElement) {
-
-        textElement.textContent =
-            notation;
-
+        textElement.textContent = notation;
     }
 
 
-    if (
-        descriptionElement
-    ) {
+    if (descriptionElement) {
 
         if (captured) {
 
@@ -2812,7 +2863,7 @@ function updateCurrentAIMove(
 
 
 /* =========================================================
-   INDICADOR "PENSANDO"
+   INDICADOR PENSANDO
 ========================================================= */
 
 function showAIThinking(
@@ -2827,10 +2878,7 @@ function showAIThinking(
 
 
     const element =
-        document.getElementById(
-            id
-        );
-
+        document.getElementById(id);
 
     if (!element) return;
 
@@ -2864,16 +2912,11 @@ function toggleAIPause() {
 
     if (aiPaused) {
 
-        clearTimeout(
-            aiMoveTimer
-        );
+        clearTimeout(aiMoveTimer);
 
 
         if (button) {
-
-            button.innerHTML =
-                "▶ Continuar";
-
+            button.innerHTML = "▶ Continuar";
         }
 
 
@@ -2882,23 +2925,16 @@ function toggleAIPause() {
                 "aiGameStatus"
             );
 
-
         if (status) {
-
             status.textContent =
                 "Demostración pausada.";
-
         }
 
     } else {
 
         if (button) {
-
-            button.innerHTML =
-                "⏸ Pausar";
-
+            button.innerHTML = "⏸ Pausar";
         }
-
 
         runAIMove();
 
@@ -2916,21 +2952,15 @@ function stopAIGame() {
     aiPlaying =
         false;
 
-
     aiPaused =
         false;
 
-
-    clearTimeout(
-        aiMoveTimer
-    );
-
+    clearTimeout(aiMoveTimer);
 
     showAIThinking(
         "white",
         false
     );
-
 
     showAIThinking(
         "black",
@@ -2949,10 +2979,7 @@ function finishAIGame() {
     aiPlaying =
         false;
 
-
-    clearTimeout(
-        aiMoveTimer
-    );
+    clearTimeout(aiMoveTimer);
 
 
     const status =
@@ -2986,7 +3013,7 @@ function finishAIGame() {
 
 
 /* =========================================================
-   REINICIAR PARTIDA DEL ALUMNO
+   REINICIAR PARTIDA DEL JUGADOR
 ========================================================= */
 
 function resetGame() {
@@ -2994,36 +3021,33 @@ function resetGame() {
     board =
         createInitialBoard();
 
-
     selectedSquare =
         null;
-
 
     currentTurn =
         "white";
 
-
     gameOver =
         false;
-
 
     playerScore =
         0;
 
-
     aiScore =
         0;
-
 
     moveNumber =
         1;
 
 
-    /*
-       LIMPIAR FLECHAS
-    */
+    /* LIMPIAR FLECHAS DEL TABLERO */
 
     lastThreeMoves = [];
+
+
+    /* NUEVO: LIMPIAR LÍNEAS DE LA CUADRÍCULA */
+
+    gridMoves = [];
 
 
     const canvas =
@@ -3062,11 +3086,11 @@ function resetGame() {
 
     updateScores();
 
-
     clearHighlights();
 
-
     renderBoard();
+
+    drawGridMoves();
 
 
     showAnalysis(
@@ -3095,7 +3119,6 @@ function checkGameEnd() {
             "white"
         );
 
-
     const blackMoves =
         getAllLegalMoves(
             board,
@@ -3103,9 +3126,7 @@ function checkGameEnd() {
         );
 
 
-    if (
-        whiteMoves.length === 0
-    ) {
+    if (whiteMoves.length === 0) {
 
         endGame("ai");
 
@@ -3114,9 +3135,7 @@ function checkGameEnd() {
     }
 
 
-    if (
-        blackMoves.length === 0
-    ) {
+    if (blackMoves.length === 0) {
 
         endGame("player");
 
@@ -3128,65 +3147,37 @@ function checkGameEnd() {
     return false;
 
 }
-
-
 /* =========================================================
    FINAL DE PARTIDA
 ========================================================= */
 
-function endGame(
-    winner
-) {
+function endGame(winner) {
 
-    gameOver =
-        true;
-
+    gameOver = true;
 
     totalGames++;
 
-
-    if (
-        winner === "player"
-    ) {
+    if (winner === "player") {
 
         totalWins++;
 
-
-        playerScore +=
-            100;
-
+        playerScore += 100;
 
         updateScores();
 
-
         const winModal =
-            document.getElementById(
-                "winModal"
-            );
-
+            document.getElementById("winModal");
 
         const winScore =
-            document.getElementById(
-                "winModalScore"
-            );
-
+            document.getElementById("winModalScore");
 
         if (winScore) {
-
-            winScore.textContent =
-                "+100";
-
+            winScore.textContent = "+100";
         }
-
 
         if (winModal) {
-
-            winModal.classList.remove(
-                "hidden"
-            );
-
+            winModal.classList.remove("hidden");
         }
-
 
         updateGameMessage(
             "¡Ganaste la partida!"
@@ -3198,7 +3189,6 @@ function endGame(
             "La IA ganó la partida."
         );
 
-
         showAnalysis(
             "Partida terminada",
             "La inteligencia artificial consiguió la victoria.",
@@ -3206,7 +3196,6 @@ function endGame(
         );
 
     }
-
 
     updateStatistics();
 
@@ -3220,69 +3209,43 @@ function endGame(
 function updateStatistics() {
 
     const games =
-        document.getElementById(
-            "statGames"
-        );
-
+        document.getElementById("statGames");
 
     const wins =
-        document.getElementById(
-            "statWins"
-        );
-
+        document.getElementById("statWins");
 
     const accuracy =
-        document.getElementById(
-            "statAccuracy"
-        );
-
+        document.getElementById("statAccuracy");
 
     const totalScore =
-        document.getElementById(
-            "statTotalScore"
-        );
+        document.getElementById("statTotalScore");
 
 
     if (games) {
-
-        games.textContent =
-            totalGames;
-
+        games.textContent = totalGames;
     }
 
-
     if (wins) {
-
-        wins.textContent =
-            totalWins;
-
+        wins.textContent = totalWins;
     }
 
 
     const accuracyValue =
         totalMoves > 0
             ? Math.round(
-                (
-                    goodMoves /
-                    totalMoves
-                ) * 100
+                (goodMoves / totalMoves) * 100
             )
             : 0;
 
 
     if (accuracy) {
-
         accuracy.textContent =
             `${accuracyValue}%`;
-
     }
 
-
     if (totalScore) {
-
         totalScore.textContent =
             playerScore;
-
     }
 
 
@@ -3294,15 +3257,10 @@ function updateStatistics() {
 
 
     const progressFill =
-        document.getElementById(
-            "progressFill"
-        );
-
+        document.getElementById("progressFill");
 
     const progressPercent =
-        document.getElementById(
-            "progressPercent"
-        );
+        document.getElementById("progressPercent");
 
 
     if (progressFill) {
@@ -3311,7 +3269,6 @@ function updateStatistics() {
             `${progress}%`;
 
     }
-
 
     if (progressPercent) {
 
@@ -3322,30 +3279,22 @@ function updateStatistics() {
 
 
     const progressLevel =
-        document.getElementById(
-            "progressLevel"
-        );
+        document.getElementById("progressLevel");
 
 
     if (progressLevel) {
 
-        if (
-            playerScore >= 1000
-        ) {
+        if (playerScore >= 1000) {
 
             progressLevel.textContent =
                 "Experto";
 
-        } else if (
-            playerScore >= 500
-        ) {
+        } else if (playerScore >= 500) {
 
             progressLevel.textContent =
                 "Avanzado";
 
-        } else if (
-            playerScore >= 250
-        ) {
+        } else if (playerScore >= 250) {
 
             progressLevel.textContent =
                 "Intermedio";
@@ -3366,44 +3315,32 @@ function updateStatistics() {
    CAMBIO DE SECCIONES
 ========================================================= */
 
-function changeSection(
-    sectionId
-) {
+function changeSection(sectionId) {
 
     document
-        .querySelectorAll(
-            ".page-section"
-        )
-        .forEach(
-            section => {
+        .querySelectorAll(".page-section")
+        .forEach(section => {
 
-                section.classList.remove(
-                    "active-section"
-                );
+            section.classList.remove(
+                "active-section"
+            );
 
-            }
-        );
+        });
 
 
     document
-        .querySelectorAll(
-            ".nav-button"
-        )
-        .forEach(
-            button => {
+        .querySelectorAll(".nav-button")
+        .forEach(button => {
 
-                button.classList.remove(
-                    "active"
-                );
+            button.classList.remove(
+                "active"
+            );
 
-            }
-        );
+        });
 
 
     const section =
-        document.getElementById(
-            sectionId
-        );
+        document.getElementById(sectionId);
 
 
     if (section) {
@@ -3430,13 +3367,13 @@ function changeSection(
     }
 
 
-    /*
-       Si volvemos a la sección del tablero,
-       recalculamos las flechas.
-    */
-
     setTimeout(
-        drawAllMoveArrows,
+        () => {
+
+            drawAllMoveArrows();
+            drawGridMoves();
+
+        },
         100
     );
 
@@ -3444,7 +3381,7 @@ function changeSection(
 
 
 /* =========================================================
-   NUEVA PARTIDA
+   BOTÓN NUEVA PARTIDA
 ========================================================= */
 
 const newGameButton =
@@ -3457,14 +3394,18 @@ if (newGameButton) {
 
     newGameButton.addEventListener(
         "click",
-        resetGame
+        () => {
+
+            resetGame();
+
+        }
     );
 
 }
 
 
 /* =========================================================
-   REINICIAR PARTIDA
+   BOTÓN REINICIAR PARTIDA
 ========================================================= */
 
 const restartGameButton =
@@ -3477,36 +3418,36 @@ if (restartGameButton) {
 
     restartGameButton.addEventListener(
         "click",
-        resetGame
+        () => {
+
+            resetGame();
+
+        }
     );
 
 }
 
 
 /* =========================================================
-   DIFICULTAD
+   BOTONES DE DIFICULTAD
 ========================================================= */
 
 document
-    .querySelectorAll(
-        ".difficulty-button"
-    )
-    .forEach(
-        button => {
+    .querySelectorAll(".difficulty-button")
+    .forEach(button => {
 
-            button.addEventListener(
-                "click",
-                () => {
+        button.addEventListener(
+            "click",
+            () => {
 
-                    setDifficulty(
-                        button.dataset.difficulty
-                    );
+                setDifficulty(
+                    button.dataset.difficulty
+                );
 
-                }
-            );
+            }
+        );
 
-        }
-    );
+    });
 
 
 /* =========================================================
@@ -3514,29 +3455,25 @@ document
 ========================================================= */
 
 document
-    .querySelectorAll(
-        ".nav-button"
-    )
-    .forEach(
-        button => {
+    .querySelectorAll(".nav-button")
+    .forEach(button => {
 
-            button.addEventListener(
-                "click",
-                () => {
+        button.addEventListener(
+            "click",
+            () => {
 
-                    changeSection(
-                        button.dataset.section
-                    );
+                changeSection(
+                    button.dataset.section
+                );
 
-                }
-            );
+            }
+        );
 
-        }
-    );
+    });
 
 
 /* =========================================================
-   VELOCIDAD
+   VELOCIDAD IA
 ========================================================= */
 
 const speedSlider =
@@ -3572,9 +3509,7 @@ if (startAIButton) {
         () => {
 
             if (aiPlaying) {
-
                 return;
-
             }
 
             startAIGame();
@@ -3633,7 +3568,6 @@ const closeErrorModal =
     document.getElementById(
         "closeErrorModal"
     );
-
 
 const errorModalButton =
     document.getElementById(
@@ -3723,58 +3657,49 @@ if (winModalButton) {
    UTILIDAD: CLONAR TABLERO
 ========================================================= */
 
-function cloneBoard(
-    position
-) {
+function cloneBoard(position) {
 
     return position.map(
         row =>
+
             row.map(
                 piece =>
+
                     piece
                         ? {
                             type: piece.type,
                             color: piece.color
                         }
                         : null
+
             )
+
     );
 
 }
 
 
 /* =========================================================
-   UTILIDAD: DELAY IA
+   DELAY DE LA IA
 ========================================================= */
 
 function getAIDelay() {
 
-    switch (
-        difficulty
-    ) {
+    switch (difficulty) {
 
         case "easy":
-
             return 800;
 
-
         case "medium":
-
             return 1100;
 
-
         case "hard":
-
             return 1500;
 
-
         case "expert":
-
             return 1900;
 
-
         default:
-
             return 1100;
 
     }
@@ -3783,7 +3708,7 @@ function getAIDelay() {
 
 
 /* =========================================================
-   INICIALIZACIÓN
+   INICIALIZAR JUEGO
 ========================================================= */
 
 function initializeGame() {
@@ -3791,41 +3716,35 @@ function initializeGame() {
     board =
         createInitialBoard();
 
-
     aiBoard =
         createInitialBoard();
-
 
     currentTurn =
         "white";
 
-
     aiTurn =
         "white";
-
 
     difficulty =
         "medium";
 
-
     aiSpeed =
         3000;
 
-
     lastThreeMoves = [];
+
+    /* NUEVO: empezar la cuadrícula vacía */
+
+    gridMoves = [];
 
 
     renderBoard();
 
-
     renderAIBoard();
-
 
     updateScores();
 
-
     updateSpeed();
-
 
     updateStatistics();
 
@@ -3843,12 +3762,17 @@ function initializeGame() {
 
 
     /*
-       Asegurar que las flechas
-       tengan el tamaño correcto.
+       Esperar a que la página
+       termine de acomodar los elementos
     */
 
     setTimeout(
-        drawAllMoveArrows,
+        () => {
+
+            drawAllMoveArrows();
+            drawGridMoves();
+
+        },
         200
     );
 
