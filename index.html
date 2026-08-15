@@ -606,18 +606,14 @@
 
     </div>
 
-    <pre id="gridBoard" class="grid-board">
-8 | . . . . . . . .
-7 | . . . . . . . .
-6 | . . . . . . . .
-5 | . . . . . . . .
-4 | . . . . . . . .
-3 | . . . . . . . .
-2 | . . . . . . . .
-1 | . . . . . . . .
-  +----------------
-    1 2 3 4 5 6 7 8
-    </pre>
+    <canvas
+        id="gridBoard"
+        class="grid-board"
+        aria-label="Visualización de movimientos"
+        width="190"
+        height="150"
+        style="display:block; width:190px; height:150px; max-width:100%;"
+    ></canvas>
 
 </div>
 
@@ -1406,6 +1402,52 @@
 <!-- =====================================================
      JAVASCRIPT
 ===================================================== -->
+
+
+<script>
+/* Dibujo inicial para que la cuadrícula se vea aunque todavía no haya movimientos */
+(function () {
+    const canvas = document.getElementById("gridBoard");
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width;
+    const h = canvas.height;
+    const left = 35, top = 12, right = 12, bottom = 28;
+    const gw = w - left - right, gh = h - top - bottom;
+    const dx = gw / 7, dy = gh / 7;
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = "#d7e3f4";
+    ctx.strokeStyle = "#d7e3f4";
+    ctx.font = "12px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            ctx.beginPath();
+            ctx.arc(left + col * dx, top + row * dy, 1.4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.fillText(8 - row, 15, top + row * dy);
+    }
+
+    for (let col = 0; col < 8; col++) {
+        ctx.fillText(col + 1, left + col * dx, h - 9);
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(left - 12, top - 5);
+    ctx.lineTo(left - 12, top + gh + 5);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(left - 5, top + gh + 12);
+    ctx.lineTo(left + gw + 5, top + gh + 12);
+    ctx.stroke();
+})();
+</script>
 
 <script src="script.js"></script>
 
