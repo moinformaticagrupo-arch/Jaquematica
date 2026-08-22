@@ -881,10 +881,282 @@ body {
 
 
 /* =========================================================
+   RELOJES
+========================================================= */
+
+.game-tools {
+
+    width: min(760px, 100%);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 12px;
+
+    margin:
+        12px 0;
+
+    flex-wrap: wrap;
+
+}
+
+
+.clock-box {
+
+    min-width: 135px;
+
+    padding:
+        9px
+        15px;
+
+    border:
+        1px solid
+        var(--border-light);
+
+    border-radius: 12px;
+
+    text-align: center;
+
+    background:
+        rgba(255, 255, 255, 0.055);
+
+    box-shadow:
+        0 8px 25px
+        rgba(0, 0, 0, 0.12);
+
+    transition:
+        0.25s ease;
+
+}
+
+
+.clock-box span {
+
+    display: block;
+
+    font-size: 9px;
+
+    color: var(--text-secondary);
+
+    margin-bottom: 3px;
+
+    letter-spacing: 0.5px;
+
+}
+
+
+.clock-box strong {
+
+    display: block;
+
+    font-size: 23px;
+
+    line-height: 1;
+
+    letter-spacing: 1px;
+
+    font-variant-numeric: tabular-nums;
+
+}
+
+
+.player-clock-box {
+
+    border-color:
+        rgba(53, 211, 154, 0.2);
+
+}
+
+
+.ai-clock-box {
+
+    border-color:
+        rgba(79, 140, 255, 0.2);
+
+}
+
+
+.clock-box.active-clock {
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 10px 30px
+        rgba(79, 140, 255, 0.16);
+
+}
+
+
+.clock-box.low-time {
+
+    border-color:
+        rgba(255, 92, 112, 0.55);
+
+    background:
+        rgba(255, 92, 112, 0.08);
+
+}
+
+
+.clock-box.low-time strong {
+
+    color:
+        var(--danger);
+
+    animation:
+        clockWarning 0.7s
+        infinite
+        alternate;
+
+}
+
+
+@keyframes clockWarning {
+
+    from {
+
+        transform:
+            scale(1);
+
+    }
+
+    to {
+
+        transform:
+            scale(1.08);
+
+    }
+
+}
+
+
+/* =========================================================
+   SELECTORES DE TIEMPO / IA
+========================================================= */
+
+.time-select {
+
+    width: 100%;
+
+    padding:
+        10px
+        11px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.15);
+
+    border-radius: 9px;
+
+    background:
+        rgba(255, 255, 255, 0.07);
+
+    color:
+        var(--text-main);
+
+    font-family: inherit;
+
+    font-size: 11px;
+
+    cursor: pointer;
+
+    outline: none;
+
+    margin-bottom: 10px;
+
+}
+
+
+.time-select:hover {
+
+    border-color:
+        rgba(79, 140, 255, 0.4);
+
+}
+
+
+.time-select:focus {
+
+    border-color:
+        var(--accent);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(79, 140, 255, 0.1);
+
+}
+
+
+.time-select option {
+
+    background:
+        #12233a;
+
+    color:
+        white;
+
+}
+
+
+.ai-level-label {
+
+    display: block;
+
+    margin:
+        7px 0 5px;
+
+    color:
+        var(--text-secondary);
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+}
+
+
+/* =========================================================
+   BOTÓN DE PISTA
+========================================================= */
+
+#hintButton {
+
+    min-width: 105px;
+
+    border-color:
+        rgba(245, 184, 75, 0.25);
+
+    background:
+        rgba(245, 184, 75, 0.07);
+
+}
+
+
+#hintButton:hover {
+
+    border-color:
+        rgba(245, 184, 75, 0.5);
+
+    background:
+        rgba(245, 184, 75, 0.13);
+
+    color:
+        #ffd98a;
+
+}
+
+
+/* =========================================================
    TABLERO
 ========================================================= */
 
 .board-wrapper {
+
+    position: relative;
 
     width: min(760px, 100%);
 
@@ -938,6 +1210,10 @@ body {
         inset 0 0 0 1px
         rgba(0, 0, 0, 0.25);
 
+    position: relative;
+
+    z-index: 1;
+
 }
 
 
@@ -962,6 +1238,8 @@ body {
     transition:
         filter 0.18s ease,
         box-shadow 0.18s ease;
+
+    z-index: 1;
 
 }
 
@@ -1000,6 +1278,7 @@ body {
 
 /* =========================================================
    PIEZAS
+   CORRECCIÓN DE VISIBILIDAD
 ========================================================= */
 
 .chess-piece {
@@ -1009,6 +1288,9 @@ body {
     z-index: 5;
 
     font-family:
+        "Segoe UI Symbol",
+        "Noto Sans Symbols 2",
+        "DejaVu Sans",
         "Times New Roman",
         serif;
 
@@ -1019,9 +1301,138 @@ body {
 
     cursor: pointer;
 
+    user-select: none;
+
     transition:
         transform 0.18s ease,
         filter 0.18s ease;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    /* IMPORTANTE:
+       evita que la pieza herede el color
+       del tablero o de otro elemento */
+    -webkit-text-fill-color: currentColor;
+
+}
+
+
+/* =========================================================
+   PIEZAS BLANCAS
+========================================================= */
+
+.chess-piece.white,
+.chess-piece.white-piece {
+
+    color: #ffffff !important;
+
+    -webkit-text-fill-color: #ffffff !important;
+
+    text-shadow:
+        /* borde oscuro fuerte */
+        -2px -2px 0 #1f2937,
+         0px -2px 0 #1f2937,
+         2px -2px 0 #1f2937,
+
+        -2px  0px 0 #1f2937,
+         2px  0px 0 #1f2937,
+
+        -2px  2px 0 #1f2937,
+         0px  2px 0 #1f2937,
+         2px  2px 0 #1f2937,
+
+        /* sombra exterior */
+         0 4px 8px rgba(0, 0, 0, 0.85);
+
+}
+
+
+/* =========================================================
+   PIEZAS NEGRAS
+========================================================= */
+
+.chess-piece.black,
+.chess-piece.black-piece {
+
+    color: #111827 !important;
+
+    -webkit-text-fill-color: #111827 !important;
+
+    text-shadow:
+        /* borde claro */
+        -2px -2px 0 #f8fafc,
+         0px -2px 0 #f8fafc,
+         2px -2px 0 #f8fafc,
+
+        -2px  0px 0 #f8fafc,
+         2px  0px 0 #f8fafc,
+
+        -2px  2px 0 #f8fafc,
+         0px  2px 0 #f8fafc,
+         2px  2px 0 #f8fafc,
+
+        /* sombra */
+         0 4px 8px rgba(0, 0, 0, 0.75);
+
+}
+
+
+/* =========================================================
+   SEGURIDAD VISUAL PARA PIEZAS BLANCAS
+========================================================= */
+
+.light-square .chess-piece.white,
+.light-square .chess-piece.white-piece {
+
+    color: #ffffff !important;
+
+    -webkit-text-fill-color: #ffffff !important;
+
+    text-shadow:
+        -2px -2px 0 #263342,
+         0px -2px 0 #263342,
+         2px -2px 0 #263342,
+
+        -2px  0px 0 #263342,
+         2px  0px 0 #263342,
+
+        -2px  2px 0 #263342,
+         0px  2px 0 #263342,
+         2px  2px 0 #263342,
+
+         0 4px 8px rgba(0, 0, 0, 0.8);
+
+}
+
+
+/* =========================================================
+   SEGURIDAD VISUAL PARA PIEZAS NEGRAS
+========================================================= */
+
+.dark-square .chess-piece.black,
+.dark-square .chess-piece.black-piece {
+
+    color: #111827 !important;
+
+    -webkit-text-fill-color: #111827 !important;
+
+    text-shadow:
+        -2px -2px 0 #ffffff,
+         0px -2px 0 #ffffff,
+         2px -2px 0 #ffffff,
+
+        -2px  0px 0 #ffffff,
+         2px  0px 0 #ffffff,
+
+        -2px  2px 0 #ffffff,
+         0px  2px 0 #ffffff,
+         2px  2px 0 #ffffff,
+
+         0 4px 8px rgba(0, 0, 0, 0.8);
 
 }
 
@@ -1035,24 +1446,98 @@ body {
 }
 
 
-.chess-piece.white {
+/* =========================================================
+   PISTA
+========================================================= */
 
-    color: #ffffff;
+.hint-from {
 
-    text-shadow:
-        0 2px 2px rgba(0, 0, 0, 0.75),
-        0 5px 10px rgba(0, 0, 0, 0.28);
+    box-shadow:
+        inset 0 0 0 4px #00e5ff,
+        0 0 18px rgba(0, 229, 255, 0.75) !important;
+
+    animation:
+        hintPulse 0.7s
+        infinite
+        alternate;
+
+    z-index: 8;
 
 }
 
 
-.chess-piece.black {
+.hint-to {
 
-    color: #161d27;
+    box-shadow:
+        inset 0 0 0 4px #ffd000,
+        0 0 20px rgba(255, 208, 0, 0.75) !important;
 
-    text-shadow:
-        0 1px 1px rgba(255, 255, 255, 0.35),
-        0 4px 8px rgba(0, 0, 0, 0.4);
+    animation:
+        hintPulse 0.7s
+        infinite
+        alternate;
+
+    z-index: 8;
+
+}
+
+
+@keyframes hintPulse {
+
+    from {
+
+        transform:
+            scale(0.97);
+
+    }
+
+    to {
+
+        transform:
+            scale(1);
+
+    }
+
+}
+
+
+/* =========================================================
+   JAQUE
+========================================================= */
+
+.in-check {
+
+    box-shadow:
+        inset 0 0 0 5px
+        rgba(255, 92, 112, 0.95),
+        inset 0 0 30px
+        rgba(255, 92, 112, 0.45),
+        0 0 20px
+        rgba(255, 92, 112, 0.35) !important;
+
+    animation:
+        checkPulse 0.75s
+        infinite
+        alternate;
+
+}
+
+
+@keyframes checkPulse {
+
+    from {
+
+        filter:
+            brightness(1);
+
+    }
+
+    to {
+
+        filter:
+            brightness(1.22);
+
+    }
 
 }
 
@@ -1860,6 +2345,8 @@ body {
 
 .ai-board-container {
 
+    position: relative;
+
     width: min(760px, 100%);
 
     padding: 10px;
@@ -1880,6 +2367,15 @@ body {
     box-shadow:
         0 30px 80px
         rgba(0, 0, 0, 0.35);
+
+}
+
+
+.ai-board-container .chess-board {
+
+    position: relative;
+
+    z-index: 1;
 
 }
 
@@ -2111,6 +2607,130 @@ body {
     font-size: 9px;
 
     line-height: 1.4;
+
+}
+
+
+/* =========================================================
+   ESTADO DE IA
+========================================================= */
+
+.ai-level-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding:
+        4px
+        8px;
+
+    border-radius: 20px;
+
+    background:
+        rgba(79, 140, 255, 0.1);
+
+    color:
+        var(--accent-light);
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+}
+
+
+.ai-thinking-active {
+
+    border-color:
+        rgba(79, 140, 255, 0.35) !important;
+
+    box-shadow:
+        0 0 25px
+        rgba(79, 140, 255, 0.12);
+
+}
+
+
+/* =========================================================
+   FLECHAS DE MOVIMIENTO
+========================================================= */
+
+.board-wrapper,
+.ai-board-container {
+
+    position: relative;
+
+}
+
+
+.move-canvas {
+
+    position: absolute;
+
+    top: 10px;
+
+    left: 10px;
+
+    width: calc(100% - 20px);
+
+    height: calc(100% - 20px);
+
+    display: block;
+
+    pointer-events: none;
+
+    z-index: 50;
+
+    filter:
+        drop-shadow(
+            0 2px 3px
+            rgba(0, 0, 0, 0.65)
+        )
+        drop-shadow(
+            0 0 5px
+            rgba(79, 140, 255, 0.45)
+        );
+
+}
+
+
+.ai-board-container .move-canvas {
+
+    top: 10px;
+
+    left: 10px;
+
+    width: calc(100% - 20px);
+
+    height: calc(100% - 20px);
+
+    z-index: 50;
+
+}
+
+
+@keyframes arrowAppear {
+
+    from {
+
+        opacity: 0;
+
+        transform:
+            scale(0.85);
+
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform:
+            scale(1);
+
+    }
 
 }
 
@@ -2621,6 +3241,55 @@ body {
 
 
 /* =========================================================
+   EFECTOS EXTRA
+========================================================= */
+
+.panel-card,
+.stat-card,
+.ai-player-card,
+.player-bar {
+
+    transition:
+        border-color 0.25s ease,
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+
+}
+
+
+.panel-card:hover,
+.stat-card:hover {
+
+    border-color:
+        rgba(255, 255, 255, 0.13);
+
+}
+
+
+.ai-player-card:hover,
+.player-bar:hover {
+
+    border-color:
+        rgba(255, 255, 255, 0.12);
+
+}
+
+
+/* =========================================================
+   SELECCIÓN DE TEXTO
+========================================================= */
+
+::selection {
+
+    background:
+        rgba(79, 140, 255, 0.35);
+
+    color: white;
+
+}
+
+
+/* =========================================================
    RESPONSIVE
 ========================================================= */
 
@@ -2762,6 +3431,20 @@ body {
 
     }
 
+
+    .game-tools {
+
+        gap: 8px;
+
+    }
+
+
+    .clock-box {
+
+        min-width: 120px;
+
+    }
+
 }
 
 
@@ -2881,239 +3564,64 @@ body {
 
     }
 
-}
+
+    .game-tools {
+
+        gap: 6px;
+
+    }
 
 
-/* =========================================================
-   EFECTOS EXTRA
-========================================================= */
+    .clock-box {
 
-.panel-card,
-.stat-card,
-.ai-player-card,
-.player-bar {
+        min-width: 105px;
 
-    transition:
-        border-color 0.25s ease,
-        transform 0.25s ease,
-        box-shadow 0.25s ease;
+        padding:
+            8px
+            10px;
 
-}
+    }
 
 
-.panel-card:hover,
-.stat-card:hover {
+    .clock-box strong {
 
-    border-color:
-        rgba(255, 255, 255, 0.13);
+        font-size: 19px;
 
-}
+    }
 
 
-.ai-player-card:hover,
-.player-bar:hover {
+    #hintButton {
 
-    border-color:
-        rgba(255, 255, 255, 0.12);
+        padding:
+            10px
+            12px;
 
-}
+    }
 
-
-/* =========================================================
-   SELECCIÓN DE TEXTO
-========================================================= */
-
-::selection {
-
-    background:
-        rgba(79, 140, 255, 0.35);
-
-    color: white;
-
-}
-/* =========================
-   FLECHAS DE MOVIMIENTO
-========================= */
-
-.board-wrapper{
-    position: relative;
-}
-
-.move-canvas{
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 20;
-}
-
-.chess-board{
-    position: relative;
-    z-index: 10;
-}
-.board-wrapper{
-    position: relative;
-}
-
-.move-canvas{
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 20;
-}
-
-.chess-board{
-    position: relative;
-    z-index: 10;
-}/* =========================================================
-  /* =========================================================
-   FLECHAS DE MOVIMIENTO
-   JUGADOR VS IA + IA VS IA
-========================================================= */
-
-/* El contenedor permite posicionar el canvas encima del tablero */
-.board-wrapper,
-.ai-board-container {
-    position: relative;
-}
-
-/* =========================================================
-   CANVAS DE FLECHAS
-========================================================= */
-
-.move-canvas {
-    position: absolute;
-
-    /*
-       El tablero tiene padding de 10px,
-       por eso empezamos exactamente donde comienza
-       el tablero real.
-    */
-    top: 10px;
-    left: 10px;
-
-    width: calc(100% - 20px);
-    height: calc(100% - 20px);
-
-    display: block;
-
-    pointer-events: none;
-
-    /*
-       Las flechas están encima de las casillas.
-    */
-    z-index: 50;
-}
-
-/* =========================================================
-   TABLERO
-========================================================= */
-
-.chess-board {
-    position: relative;
-    z-index: 1;
-}
-
-/* =========================================================
-   PIEZAS
-========================================================= */
-
-.chess-piece {
-    position: relative;
-    z-index: 5;
-}
-
-/* =========================================================
-   CASILLAS
-========================================================= */
-
-.chess-square {
-    position: relative;
-    z-index: 1;
-}
-
-/* =========================================================
-   IA VS IA
-========================================================= */
-
-.ai-board-container .move-canvas {
-    top: 10px;
-    left: 10px;
-
-    width: calc(100% - 20px);
-    height: calc(100% - 20px);
-
-    z-index: 50;
-}
-
-.ai-board-container .chess-board {
-    position: relative;
-    z-index: 1;
-}
-
-/* =========================================================
-   FLECHA MÁS VISIBLE
-========================================================= */
-
-.move-canvas {
-    filter:
-        drop-shadow(0 2px 3px rgba(0, 0, 0, 0.65))
-        drop-shadow(0 0 5px rgba(79, 140, 255, 0.45));
-}
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
-
-@media (max-width: 550px) {
 
     .move-canvas {
+
         top: 6px;
+
         left: 6px;
 
         width: calc(100% - 12px);
+
         height: calc(100% - 12px);
+
     }
 
-}
 
-/* =========================================================
-   ANIMACIÓN DE LAS FLECHAS
-========================================================= */
+    .ai-board-container .move-canvas {
 
-@keyframes arrowAppear {
+        top: 6px;
 
-    from {
-        opacity: 0;
-        transform: scale(0.85);
+        left: 6px;
+
+        width: calc(100% - 12px);
+
+        height: calc(100% - 12px);
+
     }
 
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-
-}
-.board-wrapper{
-    position: relative;
-}
-
-.move-canvas{
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 20;
-}
-
-#chessBoard{
-    position: relative;
-    z-index: 1;
 }
