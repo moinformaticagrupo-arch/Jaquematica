@@ -74,6 +74,7 @@ const PIECE_VALUES = {
    ESTADO DEL JUEGO
 ========================================================= */
 
+
 let board = [];
 
 let selectedSquare = null;
@@ -83,7 +84,6 @@ let currentTurn = "white";
 let gameOver = false;
 
 let difficulty = "medium";
-
 let playerScore = 0;
 let aiScore = 0;
 
@@ -91,7 +91,35 @@ let totalGames = 0;
 let totalWins = 0;
 let totalMoves = 0;
 let goodMoves = 0;
+
 let moveNumber = 1;
+/* =========================================================
+   RELOJ DE PARTIDA
+========================================================= */
+
+let gameTime = 300;
+
+let playerTime = 300;
+
+let aiTime = 300;
+
+let gameTimer = null;
+
+let clockStarted = false;
+
+/* =========================================================
+   HISTORIAL PARA DESHACER
+========================================================= */
+
+let undoHistory = [];
+let pendingUndoState = null;
+
+
+/* =========================================================
+   MOVIMIENTO IA PENDIENTE
+========================================================= */
+
+let aiMoveTimeout = null;
 
 
 /* =========================================================
@@ -910,7 +938,13 @@ function handleSquareClick(row, col) {
 ========================================================= */
 
 function makePlayerMove(from, to) {
+    /* Guardar posición antes de la jugada */
 
+    saveUndoState();
+
+    /* Iniciar reloj con la primera jugada */
+
+    startGameClock();
     const movingPiece =
         board[from.row][from.col];
 
@@ -3010,6 +3044,554 @@ function finishAIGame() {
     }
 
 }
+/* =========================================================
+   RELOJ - FORMATEAR TIEMPO
+========================================================= */
+
+function formatClockTime(seconds) {
+
+    seconds = Math.max(0, Math.floor(seconds));
+
+    const minutes =
+        Math.floor(seconds / 60);
+
+    const secs =
+        seconds % 60;
+
+    return (
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(secs).padStart(2, "0")
+    );
+
+}
+
+
+/* =========================================================
+   ACTUALIZAR RELOJES
+========================================================= */
+
+function updateClocks() {
+
+    const playerClock =
+        document.getElementById("playerClock");
+
+    const aiClock =
+        document.getElementById("aiClock");
+
+
+    if (playerClock) {
+
+        playerClock.textContent =
+            formatClockTime(playerTime);
+
+    }
+
+
+    if (aiClock) {
+
+        aiClock.textContent =
+            formatClockTime(aiTime);
+
+    }
+
+}
+
+
+/* =========================================================
+   INICIAR RELOJ
+========================================================= */
+
+function startGameClock() {
+
+    if (clockStarted) return;
+
+    clockStarted = true;
+
+
+    clearInterval(gameTimer);
+
+
+    gameTimer =
+        setInterval(() => {
+
+            if (gameOver) {
+
+                stopGameClock();
+
+                return;
+
+            }
+
+
+            if (currentTurn === "white") {
+
+                playerTime--;
+
+            } else {
+
+                aiTime--;
+
+            }
+
+
+            updateClocks();
+
+
+            if (playerTime <= 0) {
+
+                playerTime = 0;
+
+                updateClocks();
+
+                stopGameClock();
+
+                endGame("ai");
+
+                return;
+
+            }
+
+
+            if (aiTime <= 0) {
+
+                aiTime = 0;
+
+                updateClocks();
+
+                stopGameClock();
+
+                endGame("player");
+
+                return;
+
+            }
+
+        }, 1000);
+
+}
+
+
+/* =========================================================
+   DETENER RELOJ
+========================================================= */
+
+function stopGameClock() {
+
+    clearInterval(gameTimer);
+
+    gameTimer = null;
+
+    clockStarted = false;
+
+}
+
+
+/* =========================================================
+   OBTENER TIEMPO SELECCIONADO
+========================================================= */
+
+function getSelectedGameTime() {
+
+    const selector =
+        document.getElementById(
+            "gameTimeSelect"
+        );
+
+
+    if (!selector) {
+
+        return 300;
+
+    }
+
+
+    const value =
+        Number(selector.value);
+
+
+    return (
+        Number.isFinite(value) &&
+        value > 0
+    )
+        ? value
+        : 300;
+
+}
+
+
+/* =========================================================
+   REINICIAR RELOJ
+========================================================= */
+
+function resetClocks() {
+
+    const selectedTime =
+        getSelectedGameTime();
+
+
+    playerTime =
+        selectedTime;
+
+    aiTime =
+        selectedTime;
+
+
+    stopGameClock();
+
+    updateClocks();
+
+}
+
+
+/* =========================================================
+   GUARDAR ESTADO PARA DESHACER
+========================================================= */
+
+function saveUndoState() {
+
+    undoHistory.push({
+
+        board:
+            cloneBoard(board),
+
+        currentTurn:
+            currentTurn,
+
+        playerScore:
+            playerScore,
+
+        aiScore:
+            aiScore,
+
+        moveNumber:
+            moveNumber,
+
+        lastThreeMoves:
+            lastThreeMoves.map(
+                move => ({
+                    fromRow: move.fromRow,
+                    fromCol: move.fromCol,
+                    toRow: move.toRow,
+                    toCol: move.toCol
+                })
+            ),
+
+        gridMoves:
+            gridMoves.map(
+                move => ({
+                    fromRow: move.fromRow,
+                    fromCol: move.fromCol,
+                    toRow: move.toRow,
+                    toCol: move.toCol
+                })
+            ),
+
+        playerTime:
+            playerTime,
+
+        aiTime:
+            aiTime,
+
+        clockStarted:
+            clockStarted,
+
+        historyHTML:
+            moveHistory
+                ? moveHistory.innerHTML
+                : ""
+
+    });
+
+}
+
+
+/* =========================================================
+   DESHACER MOVIMIENTO
+========================================================= */
+
+function undoMove() {
+
+    if (gameOver) {
+
+        showMessage(
+            "La partida ya terminó.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if (undoHistory.length === 0) {
+
+        showMessage(
+            "No hay movimientos para deshacer.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    /* Cancelar una IA que todavía está pensando */
+
+    if (aiMoveTimeout) {
+
+        clearTimeout(aiMoveTimeout);
+
+        aiMoveTimeout = null;
+
+    }
+
+
+    /* Restaurar último estado */
+
+    const previousState =
+        undoHistory.pop();
+
+
+    board =
+        cloneBoard(
+            previousState.board
+        );
+
+
+    currentTurn =
+        previousState.currentTurn;
+
+
+    playerScore =
+        previousState.playerScore;
+
+
+    aiScore =
+        previousState.aiScore;
+
+
+    moveNumber =
+        previousState.moveNumber;
+
+
+    lastThreeMoves =
+        previousState.lastThreeMoves.map(
+            move => ({
+                fromRow: move.fromRow,
+                fromCol: move.fromCol,
+                toRow: move.toRow,
+                toCol: move.toCol
+            })
+        );
+
+
+    gridMoves =
+        previousState.gridMoves.map(
+            move => ({
+                fromRow: move.fromRow,
+                fromCol: move.fromCol,
+                toRow: move.toRow,
+                toCol: move.toCol
+            })
+        );
+
+
+    playerTime =
+        previousState.playerTime;
+
+
+    aiTime =
+        previousState.aiTime;
+
+
+    selectedSquare =
+        null;
+
+
+    clearHighlights();
+
+
+    /* Restaurar historial */
+
+    if (moveHistory) {
+
+        moveHistory.innerHTML =
+            previousState.historyHTML;
+
+    }
+
+
+    updateScores();
+
+    updateClocks();
+
+    renderBoard();
+
+    drawGridMoves();
+
+
+    /* Volver a activar el reloj */
+
+    if (previousState.clockStarted) {
+
+        startGameClock();
+
+    } else {
+
+        stopGameClock();
+
+    }
+
+
+    updateGameMessage(
+        currentTurn === "white"
+            ? "Tu turno. Elegí una pieza."
+            : "La IA está pensando..."
+    );
+
+
+    showAnalysis(
+        "Movimiento deshecho",
+        "La partida volvió a la posición anterior.",
+        "success"
+    );
+
+}
+
+/* =========================================================
+   PISTA PARA EL JUGADOR
+========================================================= */
+
+function giveHint() {
+
+    if (gameOver) {
+
+        const message =
+            document.getElementById("gameMessageText");
+
+        if (message) {
+
+            message.textContent =
+                "La partida ya terminó.";
+
+        }
+
+        return;
+    }
+
+
+    if (currentTurn !== "white") {
+
+        const message =
+            document.getElementById("gameMessageText");
+
+        if (message) {
+
+            message.textContent =
+                "Esperá a que la IA termine su movimiento.";
+
+        }
+
+        return;
+    }
+
+
+    const possibleMoves =
+        getAllLegalMoves(
+            board,
+            "white"
+        );
+
+
+    if (
+        !possibleMoves ||
+        possibleMoves.length === 0
+    ) {
+
+        const message =
+            document.getElementById("gameMessageText");
+
+        if (message) {
+
+            message.textContent =
+                "No hay movimientos disponibles.";
+
+        }
+
+        return;
+    }
+
+
+    const hintMove =
+        possibleMoves[
+            Math.floor(
+                Math.random() *
+                possibleMoves.length
+            )
+        ];
+
+
+    const from =
+        hintMove.from;
+
+    const to =
+        hintMove.to;
+
+
+    selectedSquare = {
+
+        row: from.row,
+        col: from.col
+
+    };
+
+
+    renderBoard();
+
+
+    addMoveArrow(
+        from,
+        to
+    );
+
+
+    const message =
+        document.getElementById(
+            "gameMessageText"
+        );
+
+
+    if (message) {
+
+        message.textContent =
+            "💡 Pista: mové la pieza señalada hacia la casilla indicada.";
+
+    }
+
+
+    if (analysisContent) {
+
+        analysisContent.innerHTML = `
+
+            <div class="analysis-placeholder">
+
+                <span>💡</span>
+
+                <p>
+                    La pista te muestra una
+                    jugada posible.
+                    Seguí la flecha amarilla
+                    para realizarla.
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+}
 
 
 /* =========================================================
@@ -3038,6 +3620,19 @@ function resetGame() {
 
     moveNumber =
         1;
+        moveNumber =
+    1;
+
+
+/* REINICIAR TIEMPO SEGÚN SELECTOR */
+
+playerTime =
+    getSelectedGameTime();
+
+aiTime =
+    getSelectedGameTime();
+
+updateClocks();
 
 
     /* LIMPIAR FLECHAS DEL TABLERO */
@@ -3402,7 +3997,62 @@ if (newGameButton) {
     );
 
 }
+/* =========================================================
+   BOTÓN DESHACER MOVIMIENTO
+========================================================= */
 
+const undoButton =
+    document.getElementById(
+        "undoButton"
+    );
+
+if (undoButton) {
+
+    undoButton.addEventListener(
+        "click",
+        () => {
+
+            undoMove();
+
+        }
+    );
+
+}
+/* =========================================================
+   CAMBIO DE TIEMPO DEL RELOJ
+========================================================= */
+
+const gameTimeSelect =
+    document.getElementById(
+        "gameTimeSelect"
+    );
+
+
+if (gameTimeSelect) {
+
+    gameTimeSelect.addEventListener(
+        "change",
+        function(){
+
+            const selectedTime =
+    Number(
+        this.value
+    );
+
+
+playerTime =
+    selectedTime;
+
+
+aiTime =
+    selectedTime;
+
+
+updateClockDisplay();
+        }
+    );
+
+}
 
 /* =========================================================
    BOTÓN REINICIAR PARTIDA
@@ -3795,5 +4445,72 @@ if (
 } else {
 
     initializeGame();
+
+}
+/* =========================================================
+   BOTÓN DE PISTA
+========================================================= */
+
+const hintButton =
+    document.getElementById("hintButton");
+
+
+if (hintButton) {
+
+    hintButton.addEventListener(
+        "click",
+        function () {
+
+            giveHint();
+
+        }
+    );
+
+}
+function updateClockDisplay() {
+
+    const playerClock = document.getElementById("playerClock");
+    const aiClock = document.getElementById("aiClock");
+
+    if (playerClock && typeof playerTime !== "undefined") {
+
+        let minutes = Math.floor(playerTime / 60);
+        let seconds = playerTime % 60;
+
+        playerClock.textContent =
+            `${String(minutes).padStart(2,"0")}:${String(seconds).padStart(2,"0")}`;
+    }
+
+
+    if (aiClock && typeof aiTime !== "undefined") {
+
+        let minutes = Math.floor(aiTime / 60);
+        let seconds = aiTime % 60;
+
+        aiClock.textContent =
+            `${String(minutes).padStart(2,"0")}:${String(seconds).padStart(2,"0")}`;
+    }
+
+}
+function updateClockDisplay() {
+
+    const playerClock = document.getElementById("playerClock");
+    const aiClock = document.getElementById("aiClock");
+
+    if (playerClock) {
+        let minutes = Math.floor(playerTime / 60);
+        let seconds = playerTime % 60;
+
+        playerClock.textContent =
+            `${String(minutes).padStart(2,"0")}:${String(seconds).padStart(2,"0")}`;
+    }
+
+    if (aiClock) {
+        let minutes = Math.floor(aiTime / 60);
+        let seconds = aiTime % 60;
+
+        aiClock.textContent =
+            `${String(minutes).padStart(2,"0")}:${String(seconds).padStart(2,"0")}`;
+    }
 
 }
