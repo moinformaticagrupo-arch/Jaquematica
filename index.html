@@ -14,7 +14,7 @@
         content="Plataforma educativa de ajedrez con inteligencia artificial"
     >
 
-    <title> Jaquematica | Plataforma Educativa</title>
+    <title>Jaquematica | Plataforma Educativa</title>
 
     <!-- CSS -->
     <link rel="stylesheet" href="style.css">
@@ -27,7 +27,7 @@
 
     <link
         rel="preconnect"
-        href="https://fonts.gstatic.com"
+        href="https://fonts.googleapis.com"
         crossorigin
     >
 
@@ -58,15 +58,6 @@
     <div class="header-left">
 
         <div class="school-logo-container">
-
-            <!--
-                IMPORTANTE:
-                Guardá el logo de tu escuela como:
-
-                logo-escuela.png
-
-                en la misma carpeta que este HTML.
-            -->
 
             <img
                 src="logo.jpeg"
@@ -113,7 +104,7 @@
 
 
 <!-- =====================================================
-     NAVEGACIÓN.ESCUELA
+     NAVEGACIÓN
 ===================================================== -->
 
 <nav class="main-navigation">
@@ -273,29 +264,78 @@
 
 
 
+            <!-- =================================================
+                 RELOJES Y PISTA
+            ================================================= -->
+
+            <div class="game-tools">
+
+                <div class="clock-box ai-clock-box">
+
+                    <span>
+                        🤖 TIEMPO IA
+                    </span>
+
+                    <strong id="aiClock">
+                        05:00
+                    </strong>
+
+                </div>
+
+
+                <button
+                    id="hintButton"
+                    class="secondary-button"
+                    type="button"
+                >
+
+                    💡 Pista
+
+                </button>
+
+
+                <div class="clock-box player-clock-box">
+
+                    <span>
+                        👤 TU TIEMPO
+                    </span>
+
+                    <strong id="playerClock">
+                        05:00
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+
             <!-- TABLERO -->
 
             <div class="board-wrapper">
 
-    <canvas
-        id="moveCanvas"
-        class="move-canvas"
-    ></canvas>
+                <canvas
+                    id="moveCanvas"
+                    class="move-canvas"
+                ></canvas>
 
-    <div
-        id="chessBoard"
-        class="chess-board"
-        aria-label="Tablero de ajedrez"
-    >
 
-        <!--
-            Las casillas serán creadas
-            automáticamente por JavaScript.
-        -->
+                <div
+                    id="chessBoard"
+                    class="chess-board"
+                    aria-label="Tablero de ajedrez"
+                >
 
-    </div>
+                    <!--
+                        Las casillas serán creadas
+                        automáticamente por JavaScript.
+                    -->
 
-</div>
+                </div>
+
+            </div>
+
+
 
             <!-- JUGADOR -->
 
@@ -363,7 +403,66 @@
         <aside class="game-sidebar">
 
 
-            <!-- DIFICULTAD -->
+            <!-- =================================================
+                 RELOJ
+            ================================================= -->
+
+            <div class="panel-card">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <span class="panel-label">
+                            TIEMPO
+                        </span>
+
+                        <h3>
+                            Reloj de partida
+                        </h3>
+
+                    </div>
+
+                    <div class="panel-icon">
+                        ⏱
+                    </div>
+
+                </div>
+
+
+                <select
+                    id="gameTimeSelect"
+                    class="time-select"
+                >
+
+                    <option value="60">
+                        1 minuto
+                    </option>
+
+                    <option value="180">
+                        3 minutos
+                    </option>
+
+                    <option
+                        value="300"
+                        selected
+                    >
+                        5 minutos
+                    </option>
+
+                    <option value="600">
+                        10 minutos
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 DIFICULTAD
+            ================================================= -->
 
             <div class="panel-card">
 
@@ -394,6 +493,7 @@
                     <button
                         class="difficulty-button"
                         data-difficulty="easy"
+                        type="button"
                     >
                         🟢 Fácil
                     </button>
@@ -402,6 +502,7 @@
                     <button
                         class="difficulty-button active"
                         data-difficulty="medium"
+                        type="button"
                     >
                         🟡 Medio
                     </button>
@@ -410,6 +511,7 @@
                     <button
                         class="difficulty-button"
                         data-difficulty="hard"
+                        type="button"
                     >
                         🔴 Difícil
                     </button>
@@ -418,6 +520,7 @@
                     <button
                         class="difficulty-button"
                         data-difficulty="expert"
+                        type="button"
                     >
                         🧠 Experto
                     </button>
@@ -429,7 +532,9 @@
 
 
 
-            <!-- PUNTUACIÓN -->
+            <!-- =================================================
+                 PUNTUACIÓN
+            ================================================= -->
 
             <div class="panel-card">
 
@@ -492,7 +597,9 @@
 
 
 
-            <!-- ANÁLISIS -->
+            <!-- =================================================
+                 ANÁLISIS
+            ================================================= -->
 
             <div class="panel-card">
 
@@ -541,7 +648,9 @@
 
 
 
-            <!-- HISTORIAL -->
+            <!-- =================================================
+                 HISTORIAL
+            ================================================= -->
 
             <div class="panel-card">
 
@@ -578,59 +687,83 @@
                     </div>
 
                 </div>
-</div>
 
-</div>
-
-<!-- CUADRÍCULA -->
-
-<div class="panel-card">
-
-    <div class="panel-header">
-
-        <div>
-
-            <span class="panel-label">
-                VISUALIZACIÓN
-            </span>
-
-            <h3>
-                Cuadrícula
-            </h3>
-
-        </div>
-
-        <div class="panel-icon">
-            #️⃣
-        </div>
-
-    </div>
-
-    <canvas
-        id="gridBoard"
-        class="grid-board"
-        aria-label="Visualización de movimientos"
-        width="190"
-        height="150"
-        style="display:block; width:190px; height:150px; max-width:100%;"
-    ></canvas>
-
-</div>
-
-<!-- REINICIAR -->
-
-<div class="panel-card">
             </div>
 
 
 
-            <!-- REINICIAR -->
+            <!-- =================================================
+                 CUADRÍCULA
+            ================================================= -->
+
+            <div class="panel-card">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <span class="panel-label">
+                            VISUALIZACIÓN
+                        </span>
+
+                        <h3>
+                            Cuadrícula
+                        </h3>
+
+                    </div>
+
+                    <div class="panel-icon">
+                        #️⃣
+                    </div>
+
+                </div>
+
+
+                <canvas
+                    id="gridBoard"
+                    class="grid-board"
+                    aria-label="Visualización de movimientos"
+                    width="190"
+                    height="150"
+                    style="display:block; width:190px; height:150px; max-width:100%;"
+                ></canvas>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 DESHACER
+            ================================================= -->
+
+            <div class="panel-card">
+
+                <button
+                    id="undoMoveButton"
+                    class="secondary-button full-button"
+                    type="button"
+                >
+
+                    ↩
+
+                    Deshacer movimiento
+
+                </button>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 REINICIAR
+            ================================================= -->
 
             <div class="panel-card">
 
                 <button
                     id="restartGameButton"
                     class="secondary-button full-button"
+                    type="button"
                 >
 
                     ↻
@@ -684,6 +817,7 @@
         <button
             id="startAIButton"
             class="primary-button"
+            type="button"
         >
 
             ▶
@@ -726,8 +860,8 @@
                             IA Blancas
                         </strong>
 
-                        <span>
-                            Inteligencia artificial
+                        <span id="whiteAILevelLabel">
+                            Inteligencia artificial · Medio
                         </span>
 
                     </div>
@@ -754,25 +888,25 @@
 
             <div class="ai-board-container">
 
-    <!-- CANVAS PARA LAS FLECHAS DE LAS JUGADAS DE LA IA -->
-    <canvas
-        id="aiMoveCanvas"
-        class="move-canvas"
-    ></canvas>
+                <!-- CANVAS PARA LAS FLECHAS -->
+                <canvas
+                    id="aiMoveCanvas"
+                    class="move-canvas"
+                ></canvas>
 
-    <!-- TABLERO IA VS IA -->
-    <div
-        id="aiChessBoard"
-        class="chess-board ai-chess-board"
-        aria-label="Tablero de ajedrez IA contra IA"
-    >
 
-        <!-- Las piezas serán creadas automáticamente por JavaScript -->
+                <!-- TABLERO IA VS IA -->
 
-    </div>
+                <div
+                    id="aiChessBoard"
+                    class="chess-board ai-chess-board"
+                    aria-label="Tablero de ajedrez IA contra IA"
+                >
 
-</div>
-                    <!-- JavaScript -->
+                    <!--
+                        Las piezas serán creadas
+                        automáticamente por JavaScript.
+                    -->
 
                 </div>
 
@@ -796,8 +930,8 @@
                             IA Negras
                         </strong>
 
-                        <span>
-                            Inteligencia artificial
+                        <span id="blackAILevelLabel">
+                            Inteligencia artificial · Medio
                         </span>
 
                     </div>
@@ -844,7 +978,9 @@
         <aside class="ai-sidebar">
 
 
-            <!-- VELOCIDAD -->
+            <!-- =================================================
+                 VELOCIDAD
+            ================================================= -->
 
             <div class="panel-card">
 
@@ -909,7 +1045,117 @@
 
 
 
-            <!-- MOVIMIENTO ACTUAL -->
+            <!-- =================================================
+                 NIVELES IA VS IA
+            ================================================= -->
+
+            <div class="panel-card">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <span class="panel-label">
+                            INTELIGENCIA ARTIFICIAL
+                        </span>
+
+                        <h3>
+                            Niveles de IA
+                        </h3>
+
+                    </div>
+
+                    <div class="panel-icon">
+                        🧠
+                    </div>
+
+                </div>
+
+
+                <!-- BLANCAS -->
+
+                <label
+                    for="aiWhiteLevel"
+                    class="ai-level-label"
+                >
+
+                    ♔ IA Blancas
+
+                </label>
+
+
+                <select
+                    id="aiWhiteLevel"
+                    class="time-select"
+                >
+
+                    <option value="easy">
+                        🟢 Fácil
+                    </option>
+
+                    <option
+                        value="medium"
+                        selected
+                    >
+                        🟡 Medio
+                    </option>
+
+                    <option value="hard">
+                        🔴 Difícil
+                    </option>
+
+                    <option value="expert">
+                        🧠 Experto
+                    </option>
+
+                </select>
+
+
+                <!-- NEGRAS -->
+
+                <label
+                    for="aiBlackLevel"
+                    class="ai-level-label"
+                >
+
+                    ♚ IA Negras
+
+                </label>
+
+
+                <select
+                    id="aiBlackLevel"
+                    class="time-select"
+                >
+
+                    <option value="easy">
+                        🟢 Fácil
+                    </option>
+
+                    <option
+                        value="medium"
+                        selected
+                    >
+                        🟡 Medio
+                    </option>
+
+                    <option value="hard">
+                        🔴 Difícil
+                    </option>
+
+                    <option value="expert">
+                        🧠 Experto
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 MOVIMIENTO ACTUAL
+            ================================================= -->
 
             <div class="panel-card">
 
@@ -962,7 +1208,9 @@
 
 
 
-            <!-- INFORMACIÓN -->
+            <!-- =================================================
+                 INFORMACIÓN
+            ================================================= -->
 
             <div class="panel-card">
 
@@ -1009,7 +1257,9 @@
 
 
 
-            <!-- CONTROLES -->
+            <!-- =================================================
+                 CONTROLES
+            ================================================= -->
 
             <div class="panel-card">
 
@@ -1017,6 +1267,7 @@
                 <button
                     id="pauseAIButton"
                     class="secondary-button full-button"
+                    type="button"
                 >
 
                     ⏸
@@ -1029,6 +1280,7 @@
                 <button
                     id="resetAIButton"
                     class="secondary-button full-button"
+                    type="button"
                 >
 
                     ↻
@@ -1160,7 +1412,9 @@
 
 
 
-    <!-- PROGRESO -->
+    <!-- =================================================
+         PROGRESO
+    ================================================= -->
 
     <div class="panel-card progress-card">
 
@@ -1234,8 +1488,11 @@
             id="closeErrorModal"
             class="modal-close"
             aria-label="Cerrar"
+            type="button"
         >
+
             ×
+
         </button>
 
 
@@ -1260,6 +1517,7 @@
         <button
             id="errorModalButton"
             class="primary-button"
+            type="button"
         >
 
             Entendido
@@ -1321,6 +1579,7 @@
         <button
             id="winModalButton"
             class="primary-button"
+            type="button"
         >
 
             Nueva partida
@@ -1374,7 +1633,7 @@
         </span>
 
         <strong>
-            Matemática + Ajedrez 
+            Matemática + Ajedrez
         </strong>
 
     </div>
@@ -1405,49 +1664,192 @@
 
 
 <script>
-/* Dibujo inicial para que la cuadrícula se vea aunque todavía no haya movimientos */
+
+/*
+    Dibujo inicial para que la cuadrícula
+    se vea aunque todavía no haya movimientos.
+*/
+
 (function () {
-    const canvas = document.getElementById("gridBoard");
+
+    const canvas =
+        document.getElementById(
+            "gridBoard"
+        );
+
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
-    const w = canvas.width;
-    const h = canvas.height;
-    const left = 35, top = 12, right = 12, bottom = 28;
-    const gw = w - left - right, gh = h - top - bottom;
-    const dx = gw / 7, dy = gh / 7;
 
-    ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = "#d7e3f4";
-    ctx.strokeStyle = "#d7e3f4";
-    ctx.font = "12px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+    const ctx =
+        canvas.getContext("2d");
 
-    for (let row = 0; row < 8; row++) {
-        for (let col = 0; col < 8; col++) {
+
+    const w =
+        canvas.width;
+
+
+    const h =
+        canvas.height;
+
+
+    const left = 35;
+    const top = 12;
+    const right = 12;
+    const bottom = 28;
+
+
+    const gw =
+        w -
+        left -
+        right;
+
+
+    const gh =
+        h -
+        top -
+        bottom;
+
+
+    const dx =
+        gw / 7;
+
+
+    const dy =
+        gh / 7;
+
+
+    ctx.clearRect(
+        0,
+        0,
+        w,
+        h
+    );
+
+
+    ctx.fillStyle =
+        "#d7e3f4";
+
+
+    ctx.strokeStyle =
+        "#d7e3f4";
+
+
+    ctx.font =
+        "12px Arial";
+
+
+    ctx.textAlign =
+        "center";
+
+
+    ctx.textBaseline =
+        "middle";
+
+
+    for (
+        let row = 0;
+        row < 8;
+        row++
+    ) {
+
+        for (
+            let col = 0;
+            col < 8;
+            col++
+        ) {
+
             ctx.beginPath();
-            ctx.arc(left + col * dx, top + row * dy, 1.4, 0, Math.PI * 2);
+
+            ctx.arc(
+                left +
+                col * dx,
+
+                top +
+                row * dy,
+
+                1.4,
+
+                0,
+
+                Math.PI * 2
+            );
+
             ctx.fill();
+
         }
-        ctx.fillText(8 - row, 15, top + row * dy);
+
+
+        ctx.fillText(
+            8 - row,
+            15,
+            top +
+            row * dy
+        );
+
     }
 
-    for (let col = 0; col < 8; col++) {
-        ctx.fillText(col + 1, left + col * dx, h - 9);
+
+    for (
+        let col = 0;
+        col < 8;
+        col++
+    ) {
+
+        ctx.fillText(
+            col + 1,
+            left +
+            col * dx,
+            h - 9
+        );
+
     }
 
-    ctx.beginPath();
-    ctx.moveTo(left - 12, top - 5);
-    ctx.lineTo(left - 12, top + gh + 5);
-    ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(left - 5, top + gh + 12);
-    ctx.lineTo(left + gw + 5, top + gh + 12);
+
+    ctx.moveTo(
+        left - 12,
+        top - 5
+    );
+
+    ctx.lineTo(
+        left - 12,
+        top +
+        gh +
+        5
+    );
+
     ctx.stroke();
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        left - 5,
+        top +
+        gh +
+        12
+    );
+
+    ctx.lineTo(
+        left +
+        gw +
+        5,
+        top +
+        gh +
+        12
+    );
+
+    ctx.stroke();
+
 })();
+
 </script>
+
+
+<!-- =====================================================
+     SCRIPT PRINCIPAL
+===================================================== -->
 
 <script src="script.js"></script>
 
