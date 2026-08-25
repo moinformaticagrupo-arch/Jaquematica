@@ -8995,6 +8995,11 @@ function finishPlayerTurn(
     currentTurn =
         "black";
 
+    /* Iniciar el reloj una vez realizado el primer movimiento válido. */
+    if (!gameOver && !clockStarted) {
+        startGameClock();
+    }
+
 
     selectedSquare =
         null;
@@ -12615,6 +12620,7 @@ function initializeAllControls() {
     initializeAIControls();
     initializeUndoButton();
     initializeUndoSystem();
+    initializeGameTimeSelector();
 }
 
 function initializeUndoButton() {
