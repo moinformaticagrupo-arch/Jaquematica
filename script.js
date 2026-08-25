@@ -190,6 +190,8 @@ let aiMoveTimer = null;
 let aiSpeed = 3000;
 
 let aiMoveCount = 0;
+let aiHalfmoveClock = 0;
+let aiEnPassantTarget = null;
 
 
 /* =========================================================
@@ -3838,6 +3840,201 @@ function makePlayerMove(
 
 }
 /* =========================================================
+   IA VS IA - VER A LAS DOS IA JUGAR
+========================================================= */
+
+function renderAIBoard() {
+    if (!aiChessBoard || !aiBoard || aiBoard.length !== 8) return;
+
+    aiChessBoard.innerHTML = "";
+
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            const square = document.createElement("div");
+            square.classList.add("chess-square");
+            square.classList.add(
+                (row + col) % 2 === 0 ? "light-square" : "dark-square"
+            );
+
+            const piece = aiBoard[row][col];
+            if (piece) {
+                const pieceElement = document.createElement("span");
+                pieceElement.classList.add("chess-piece", piece.color);
+                pieceElement.textContent = PIECES[piece.color][piece.type];
+                square.appendChild(pieceElement);
+            }
+
+            aiChessBoard.appendChild(square);
+        }
+    }
+}
+
+function getAIVsAIMove(moves, color) {
+    if (!moves.length) return null;
+
+    if (difficulty === "expert") {
+        return findBestMove(aiBoard, color) || moves[0];
+    }
+
+    const captures = moves.filter(move => {
+        if (move.enPassant) return true;
+        return !!aiBoard[move.to.row][move.to.col];
+    });
+
+    if (captures.length && Math.random() > 0.30) {
+        return captures[Math.floor(Math.random() * captures.length)];
+    }
+
+    return moves[Math.floor(Math.random() * moves.length)];
+}
+
+function runAIVsAIMove() {
+    aiMoveTimer = null;
+    if (!aiPlaying || aiPaused) return;
+
+    if (!aiBoard || aiBoard.length !== 8) {
+        aiBoard = createInitialBoard();
+    }
+
+    const color = aiTurn;
+    const legalMoves = getAllLegalMoves(aiBoard, color);
+
+    if (!legalMoves.length || aiMoveCount >= 300) {
+        aiPlaying = false;
+        renderAIBoard();
+        return;
+    }
+
+    const savedBoard = board;
+    const savedCastlingRights = castlingRights;
+    const savedEnPassantTarget = enPassantTarget;
+    const savedCurrentTurn = currentTurn;
+
+    board = aiBoard;
+    currentTurn = color;
+
+    const selectedMove = getAIVsAIMove(legalMoves, color);
+
+    if (!selectedMove) {
+        board = savedBoard;
+        castlingRights = savedCastlingRights;
+        enPassantTarget = savedEnPassantTarget;
+        currentTurn = savedCurrentTurn;
+        aiPlaying = false;
+        return;
+    }
+
+    const movingPiece = board[selectedMove.from.row][selectedMove.from.col];
+    const capturedPiece = selectedMove.enPassant
+        ? board[selectedMove.from.row][selectedMove.to.col]
+        : board[selectedMove.to.row][selectedMove.to.col];
+
+    executeMoveOnBoard(selectedMove);
+
+    if (movingPiece && (movingPiece.type === "pawn" || capturedPiece)) {
+        aiHalfmoveClock = 0;
+    } else {
+        aiHalfmoveClock++;
+    }
+
+    if (
+        movingPiece &&
+        movingPiece.type === "pawn" &&
+        Math.abs(selectedMove.to.row - selectedMove.from.row) === 2
+    ) {
+        aiEnPassantTarget = {
+            row: (selectedMove.from.row + selectedMove.to.row) / 2,
+            col: selectedMove.from.col
+        };
+    } else {
+        aiEnPassantTarget = null;
+    }
+
+    aiBoard = board;
+    aiMoveCount++;
+    aiTurn = color === "white" ? "black" : "white";
+
+    const nextStatus = getCurrentPositionStatus(aiTurn);
+
+    board = savedBoard;
+    castlingRights = savedCastlingRights;
+    enPassantTarget = savedEnPassantTarget;
+    currentTurn = savedCurrentTurn;
+
+    renderAIBoard();
+
+    if (
+        nextStatus === "checkmate" ||
+        nextStatus === "stalemate" ||
+        aiHalfmoveClock >= 100
+    ) {
+        aiPlaying = false;
+        return;
+    }
+
+    aiMoveTimer = setTimeout(
+        runAIVsAIMove,
+        Math.max(100, Number(aiSpeed) || 1000)
+    );
+}
+
+function startAIVsAI() {
+    if (aiMoveTimer) {
+        clearTimeout(aiMoveTimer);
+        aiMoveTimer = null;
+    }
+
+    aiBoard = createInitialBoard();
+    aiTurn = "white";
+    aiPlaying = true;
+    aiPaused = false;
+    aiMoveCount = 0;
+    aiHalfmoveClock = 0;
+    aiEnPassantTarget = null;
+
+    renderAIBoard();
+    runAIVsAIMove();
+}
+
+function pauseAIVsAI() {
+    if (!aiPlaying) return;
+    aiPaused = true;
+    if (aiMoveTimer) {
+        clearTimeout(aiMoveTimer);
+        aiMoveTimer = null;
+    }
+}
+
+function resumeAIVsAI() {
+    if (!aiPlaying) return;
+    aiPaused = false;
+    if (!aiMoveTimer) runAIVsAIMove();
+}
+
+function stopAIVsAI() {
+    aiPlaying = false;
+    aiPaused = false;
+    if (aiMoveTimer) {
+        clearTimeout(aiMoveTimer);
+        aiMoveTimer = null;
+    }
+}
+
+function setAIVsAISpeed(speed) {
+    const value = Number(speed);
+    if (Number.isFinite(value) && value > 0) aiSpeed = value;
+}
+
+window.startAIVsAI = startAIVsAI;
+window.playAIVsAI = startAIVsAI;
+window.verAIAJugar = startAIVsAI;
+window.watchAI = startAIVsAI;
+window.pauseAIVsAI = pauseAIVsAI;
+window.resumeAIVsAI = resumeAIVsAI;
+window.stopAIVsAI = stopAIVsAI;
+
+
+/* =========================================================
    MOVIMIENTO IA
 ========================================================= */
 
@@ -5566,6 +5763,7 @@ function endGame(
 
 
         updateScores();
+        updateStatisticsDisplay();
 
 
         return;
@@ -5629,6 +5827,8 @@ function endGame(
         }
 
 
+        updateStatisticsDisplay();
+
         return;
 
     }
@@ -5678,6 +5878,7 @@ function endGame(
 
 
     updateScores();
+    updateStatisticsDisplay();
 
 }
 /* =========================================================
@@ -6080,6 +6281,24 @@ function initializeButtons() {
         );
 
     }
+
+
+    /* =====================================================
+       BOTÓN VER A IA JUGAR
+    ===================================================== */
+
+    [
+        "aiVsAIButton",
+        "watchAIButton",
+        "verAIAJugarButton",
+        "aiPlayButton"
+    ].forEach(id => {
+        const button = document.getElementById(id);
+        if (button && button.dataset.initialized !== "true") {
+            button.dataset.initialized = "true";
+            button.addEventListener("click", startAIVsAI);
+        }
+    });
 
 
     /* =====================================================
@@ -9425,6 +9644,23 @@ function performPlayerMove(
        REALIZAR MOVIMIENTO
     ===================================================== */
 
+    const movingPieceType =
+        movingPiece.type;
+
+    const capturedPiece =
+        legalMove.enPassant
+            ? board[
+                legalMove.from.row
+            ][
+                legalMove.to.col
+            ]
+            : board[
+                legalMove.to.row
+            ][
+                legalMove.to.col
+            ];
+
+
     executeMoveOnBoard(
         legalMove
     );
@@ -9460,8 +9696,10 @@ if (
     ===================================================== */
 
     updateCastlingRightsAfterMove(
-        legalMove,
-        movingPiece
+        movingPiece,
+        legalMove.from,
+        legalMove.to,
+        capturedPiece
     );
 
 
@@ -9501,7 +9739,6 @@ if (
     }
 
 
-    totalMoves++;
 
 
     /* =====================================================
