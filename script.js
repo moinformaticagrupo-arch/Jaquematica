@@ -187,17 +187,6 @@ let aiPaused = false;
 
 let aiMoveTimer = null;
 
-/* =========================================================
-   MODO VER IA JUGAR (IA VS IA)
-========================================================= */
-let aiVsAiActive = false;
-let aiVsAiPaused = false;
-let aiVsAiTimer = null;
-let aiVsAiBoard = null;
-let aiVsAiTurn = "white";
-let aiVsAiMoveCount = 0;
-let aiVsAiMaxMoves = 300;
-
 let aiSpeed = 3000;
 
 let aiMoveCount = 0;
@@ -5103,36 +5092,33 @@ function setDifficulty(
 
 function initializeDifficulty() {
 
-    const select = document.getElementById("difficultySelect");
+    const select =
+        document.getElementById(
+            "difficultySelect"
+        );
 
-    if (select) {
-        if (!select.dataset.difficultyInitialized) {
-            select.dataset.difficultyInitialized = "true";
-            difficulty = select.value || difficulty || "medium";
-            select.addEventListener("change", function () {
-                setDifficulty(this.value);
-            });
-        } else if (select.value) {
-            difficulty = select.value;
+
+    if (!select) return;
+
+
+    difficulty =
+        select.value ||
+        "medium";
+
+
+    select.addEventListener(
+        "change",
+        function () {
+
+            difficulty =
+                this.value;
+
+
+            updateDifficultyLabel();
+
         }
-    }
+    );
 
-    const buttons = {
-        easy: ["easyDifficultyButton", "difficultyEasy", "easyButton"],
-        medium: ["mediumDifficultyButton", "difficultyMedium", "mediumButton"],
-        hard: ["hardDifficultyButton", "difficultyHard", "hardButton"],
-        expert: ["expertDifficultyButton", "difficultyExpert", "expertButton"]
-    };
-
-    Object.entries(buttons).forEach(([level, ids]) => {
-        ids.forEach(id => {
-            const button = document.getElementById(id);
-            if (button && !button.dataset.difficultyInitialized) {
-                button.dataset.difficultyInitialized = "true";
-                button.addEventListener("click", () => setDifficulty(level));
-            }
-        });
-    });
 
     updateDifficultyLabel();
 
@@ -5516,7 +5502,6 @@ function endGame(
 
 
     totalGames++;
-    updateStatisticsDisplay();
 
 
     /* =====================================================
@@ -5581,7 +5566,6 @@ function endGame(
 
 
         updateScores();
-        updateStatisticsDisplay();
 
 
         return;
@@ -5645,7 +5629,6 @@ function endGame(
         }
 
 
-        updateStatisticsDisplay();
         return;
 
     }
@@ -5695,7 +5678,6 @@ function endGame(
 
 
     updateScores();
-    updateStatisticsDisplay();
 
 }
 /* =========================================================
@@ -5703,8 +5685,6 @@ function endGame(
 ========================================================= */
 
 function resetGame() {
-
-    stopAIVsAI();
 
     /* Detener reloj */
 
@@ -5988,7 +5968,6 @@ function initializeGame() {
     ===================================================== */
 
     updateScores();
-    updateStatisticsDisplay();
 
 
     /* =====================================================
@@ -6076,11 +6055,115 @@ function initializeBoardEvents() {
 
 function initializeButtons() {
 
-    /* Los controles se inicializan en initializeAllControls().
-       Esta función queda como compatibilidad para initializeGame(). */
-    return;
+    /* =====================================================
+       BOTÓN DESHACER
+    ===================================================== */
+
+    const undoButton =
+        document.getElementById(
+            "undoMoveButton"
+        );
+
+
+    if (
+        undoButton &&
+        undoButton.dataset.initialized !== "true"
+    ) {
+
+        undoButton.dataset.initialized =
+            "true";
+
+
+        undoButton.addEventListener(
+            "click",
+            undoLastMove
+        );
+
+    }
+
+
+    /* =====================================================
+       BOTÓN REINICIAR
+    ===================================================== */
+
+    const restartButton =
+        document.getElementById(
+            "restartGameButton"
+        );
+
+
+    if (
+        restartButton &&
+        restartButton.dataset.initialized !== "true"
+    ) {
+
+        restartButton.dataset.initialized =
+            "true";
+
+
+        restartButton.addEventListener(
+            "click",
+            resetGame
+        );
+
+    }
+
+
+    /* =====================================================
+       BOTÓN NUEVA PARTIDA
+    ===================================================== */
+
+    const newGameButton =
+        document.getElementById(
+            "newGameButton"
+        );
+
+
+    if (
+        newGameButton &&
+        newGameButton.dataset.initialized !== "true"
+    ) {
+
+        newGameButton.dataset.initialized =
+            "true";
+
+
+        newGameButton.addEventListener(
+            "click",
+            resetGame
+        );
+
+    }
+
+
+    /* =====================================================
+       BOTÓN PISTA
+    ===================================================== */
+
+    const hintButton =
+        document.getElementById(
+            "hintButton"
+        );
+
+
+    if (
+        hintButton &&
+        hintButton.dataset.initialized !== "true"
+    ) {
+
+        hintButton.dataset.initialized =
+            "true";
+
+
+        hintButton.addEventListener(
+            "click",
+            showHint
+        );
+
+    }
 
 }
+
 
 /* =========================================================
    MOSTRAR PISTA
@@ -6729,8 +6812,6 @@ function undoLastMove() {
     ===================================================== */
 
     updateScores();
-    updateStatisticsDisplay();
-    updateUndoButton();
 
 
     /* =====================================================
@@ -6912,9 +6993,6 @@ function saveUndoState() {
         undoHistory.shift();
 
     }
-
-    pendingUndoState = state;
-    updateUndoButton();
 
 }
 
@@ -7153,14 +7231,25 @@ function saveGameStateForUndo() {
 
 function initializeUndoSystem() {
 
-    const button = document.getElementById("undoMoveButton");
+    const button =
+        document.getElementById(
+            "undoMoveButton"
+        );
 
-    if (!button) return;
+
+    if (!button) {
+
+        return;
+
+    }
+
+
+    button.disabled = true;
+
 
     updateUndoButton();
 
 }
-
 /* =========================================================
    CONTROL DE JAQUE Y JAQUE MATE
 ========================================================= */
@@ -8661,8 +8750,6 @@ function registerMoveStats(
 
     }
 
-    updateStatisticsDisplay();
-
 }
 
 
@@ -9333,47 +9420,37 @@ function performPlayerMove(
 
     }
 
-    const movingPieceType =
-        movingPiece.type;
-
-    const capturedPiece =
-        legalMove.enPassant
-            ? board[
-                legalMove.from.row
-            ][
-                legalMove.to.col
-            ]
-            : board[
-                legalMove.to.row
-            ][
-                legalMove.to.col
-            ];
-
 
     /* =====================================================
        REALIZAR MOVIMIENTO
     ===================================================== */
 
+    const capturedPiece = legalMove.enPassant
+        ? board[legalMove.from.row][legalMove.to.col]
+        : board[legalMove.to.row][legalMove.to.col];
+
+    const movingPieceType = movingPiece.type;
+
     executeMoveOnBoard(
         legalMove
     );
 
-/* =====================================================
-   REGLA DE LOS 50 MOVIMIENTOS
-===================================================== */
+    /* =====================================================
+       REGLA DE LOS 50 MOVIMIENTOS
+    ===================================================== */
 
-if (
-    movingPieceType === "pawn" ||
-    capturedPiece
-) {
+    if (
+        movingPieceType === "pawn" ||
+        capturedPiece
+    ) {
 
-    halfmoveClock = 0;
+        halfmoveClock = 0;
 
-} else {
+    } else {
 
-    halfmoveClock++;
+        halfmoveClock++;
 
-}
+    }
     /* =====================================================
        REGISTRAR MOVIMIENTO
     ===================================================== */
@@ -9388,12 +9465,7 @@ if (
        ACTUALIZAR DERECHOS DE ENROQUE
     ===================================================== */
 
-    updateCastlingRightsAfterMove(
-        movingPiece,
-        legalMove.from,
-        legalMove.to,
-        capturedPiece
-    );
+    /* executeMoveOnBoard ya actualizó los derechos de enroque. */
 
 
     /* =====================================================
@@ -9942,13 +10014,42 @@ function initializeRestartButton() {
 
 function initializeUndoButton() {
 
-    const button = document.getElementById("undoMoveButton");
-    if (!button) return;
+    const button =
+        document.getElementById(
+            "undoMoveButton"
+        );
 
-    if (button.dataset.undoInitialized !== "true") {
-        button.dataset.undoInitialized = "true";
-        button.addEventListener("click", undoLastMove);
+
+    if (!button) {
+
+        return;
+
     }
+
+
+    if (
+        button.dataset.ready ===
+        "true"
+    ) {
+
+        return;
+
+    }
+
+
+    button.dataset.ready =
+        "true";
+
+
+    button.addEventListener(
+        "click",
+        function() {
+
+            undoLastMove();
+
+        }
+    );
+
 
     updateUndoButton();
 
@@ -10017,397 +10118,6 @@ function initializeAllControls() {
     initializeUndoButton();
 
     initializeHintButton();
-    initializeStatisticsControls();
-    initializeAIVsAIControls();
-
-}
-
-
-/* =========================================================
-   ESTADÍSTICAS: BOTÓN / PANEL
-========================================================= */
-
-function initializeStatisticsControls() {
-
-    const buttonIds = [
-        "statisticsButton",
-        "statsButton",
-        "showStatisticsButton",
-        "statisticsBtn",
-        "statsBtn"
-    ];
-
-    const panelIds = [
-        "statisticsPanel",
-        "statsPanel",
-        "statisticsContainer",
-        "statsContainer"
-    ];
-
-    let button = buttonIds
-        .map(id => document.getElementById(id))
-        .find(Boolean);
-
-    if (!button) {
-        button = Array.from(document.querySelectorAll("button, input[type=button], input[type=submit]"))
-            .find(el => /estad[ií]sticas|statistics|stats/i.test((el.textContent || el.value || "").trim())) || null;
-    }
-
-    const panel = panelIds
-        .map(id => document.getElementById(id))
-        .find(Boolean);
-
-    if (button && !button.dataset.statsInitialized) {
-        button.dataset.statsInitialized = "true";
-        button.addEventListener("click", () => {
-            updateStatisticsDisplay();
-            if (panel) {
-                panel.hidden = !panel.hidden;
-                panel.style.display = panel.hidden ? "none" : "";
-            }
-        });
-    }
-
-    updateStatisticsDisplay();
-
-}
-
-
-/* =========================================================
-   IA VS IA / VER IA JUGAR
-========================================================= */
-
-function getAIVsAIButton() {
-
-    const ids = [
-        "watchAIButton",
-        "watchAiButton",
-        "watchAIBtn",
-        "verIAButton",
-        "verIaButton",
-        "viewAIButton",
-        "aiVsAiButton",
-        "aiVsAIButton",
-        "watchAI",
-        "watchAi",
-        "verIA"
-    ];
-
-    const byId = ids
-        .map(id => document.getElementById(id))
-        .find(Boolean);
-
-    if (byId) return byId;
-
-    return Array.from(document.querySelectorAll("button, input[type=button], input[type=submit]"))
-        .find(button => /ver\s+ia|ia\s+vs\s+ia|ver\s+a\s+ia|watch\s+ai/i.test((button.textContent || button.value || "").trim())) || null;
-
-}
-
-
-function initializeAIVsAIControls() {
-
-    const button = getAIVsAIButton();
-
-    if (!button || button.dataset.aiVsAiInitialized === "true") {
-        return;
-    }
-
-    button.dataset.aiVsAiInitialized = "true";
-
-    button.addEventListener("click", toggleAIVsAI);
-
-}
-
-
-function toggleAIVsAI() {
-
-    if (aiVsAiActive) {
-        if (aiVsAiPaused) {
-            resumeAIVsAI();
-        } else {
-            pauseAIVsAI();
-        }
-        return;
-    }
-
-    startAIVsAI();
-
-}
-
-
-function startAIVsAI() {
-
-    const target = aiChessBoard || document.getElementById("aiVsAiBoard");
-
-    if (!target) {
-        showMessage("No se encontró el tablero para Ver IA jugar.", "warning");
-        return;
-    }
-
-    stopAIVsAI();
-
-    aiVsAiBoard = createInitialBoard();
-    aiVsAiTurn = "white";
-    aiVsAiMoveCount = 0;
-    aiVsAiActive = true;
-    aiVsAiPaused = false;
-
-    target.innerHTML = "";
-    target.classList.add("ai-vs-ai-board");
-
-    renderAIVsAIBoard();
-    updateAIVsAIButton();
-    scheduleNextAIVsAIMove(450);
-
-    showMessage("🤖 Ver IA jugar: partida IA vs IA iniciada.", "info");
-
-}
-
-
-function stopAIVsAI() {
-
-    if (aiVsAiTimer) {
-        clearTimeout(aiVsAiTimer);
-        aiVsAiTimer = null;
-    }
-
-    aiVsAiActive = false;
-    aiVsAiPaused = false;
-    updateAIVsAIButton();
-
-}
-
-
-function pauseAIVsAI() {
-
-    if (!aiVsAiActive) return;
-
-    aiVsAiPaused = true;
-
-    if (aiVsAiTimer) {
-        clearTimeout(aiVsAiTimer);
-        aiVsAiTimer = null;
-    }
-
-    updateAIVsAIButton();
-    showMessage("⏸️ IA vs IA pausada.", "info");
-
-}
-
-
-function resumeAIVsAI() {
-
-    if (!aiVsAiActive) return;
-
-    aiVsAiPaused = false;
-    updateAIVsAIButton();
-    scheduleNextAIVsAIMove(250);
-    showMessage("▶️ IA vs IA reanudada.", "info");
-
-}
-
-
-function updateAIVsAIButton() {
-
-    const button = getAIVsAIButton();
-    if (!button) return;
-
-    if (!aiVsAiActive) {
-        button.textContent = "Ver IA jugar";
-    } else if (aiVsAiPaused) {
-        button.textContent = "Continuar IA";
-    } else {
-        button.textContent = "Pausar IA";
-    }
-
-}
-
-
-function scheduleNextAIVsAIMove(delay = 500) {
-
-    if (!aiVsAiActive || aiVsAiPaused) return;
-
-    if (aiVsAiTimer) clearTimeout(aiVsAiTimer);
-
-    aiVsAiTimer = setTimeout(playAIVsAIMove, delay);
-
-}
-
-
-function chooseAIMoveForColor(position, color, moves) {
-
-    if (!moves || moves.length === 0) return null;
-
-    if (difficulty === "easy") {
-        return moves[Math.floor(Math.random() * moves.length)];
-    }
-
-    if (difficulty === "medium") {
-        const captures = moves.filter(move => {
-            if (move.enPassant) return true;
-            return !!position[move.to.row][move.to.col];
-        });
-        if (captures.length && Math.random() > 0.35) {
-            return captures[Math.floor(Math.random() * captures.length)];
-        }
-        return moves[Math.floor(Math.random() * moves.length)];
-    }
-
-    if (difficulty === "hard") {
-        let best = moves[0];
-        let bestScore = -Infinity;
-        for (const move of moves) {
-            let score = Math.random() * 3;
-            const target = move.enPassant
-                ? position[move.from.row][move.to.col]
-                : position[move.to.row][move.to.col];
-            if (target) score += (PIECE_VALUES[target.type] || 0) * 10;
-            const simulated = simulateMove(position, move);
-            if (isKingInCheck(simulated, color === "white" ? "black" : "white")) score += 12;
-            if (score > bestScore) {
-                bestScore = score;
-                best = move;
-            }
-        }
-        return best;
-    }
-
-    if (difficulty === "expert") {
-        return findBestMove(position, color) || moves[0];
-    }
-
-    return moves[0];
-
-}
-
-
-function playAIVsAIMove() {
-
-    aiVsAiTimer = null;
-
-    if (!aiVsAiActive || aiVsAiPaused || !aiVsAiBoard) return;
-
-    if (aiVsAiMoveCount >= aiVsAiMaxMoves) {
-        showMessage("🤖 IA vs IA detenida por límite de movimientos.", "info");
-        stopAIVsAI();
-        return;
-    }
-
-    const color = aiVsAiTurn;
-    const moves = getAllLegalMoves(aiVsAiBoard, color);
-
-    if (!moves.length) {
-        renderAIVsAIBoard();
-        showMessage(
-            color === "white" ? "🤖 IA negra ganó." : "🤖 IA blanca ganó.",
-            "success"
-        );
-        stopAIVsAI();
-        return;
-    }
-
-    const move = chooseAIMoveForColor(aiVsAiBoard, color, moves);
-    if (!move) {
-        stopAIVsAI();
-        return;
-    }
-
-    executeMoveOnPosition(aiVsAiBoard, move);
-    aiVsAiMoveCount++;
-    aiVsAiTurn = color === "white" ? "black" : "white";
-
-    renderAIVsAIBoard();
-
-    const nextStatus = getPositionStatusOnBoard(aiVsAiBoard, aiVsAiTurn);
-    if (nextStatus === "checkmate" || nextStatus === "stalemate") {
-        showMessage(
-            nextStatus === "checkmate"
-                ? `🤖 Jaque mate. Ganó la IA ${color === "white" ? "blanca" : "negra"}.`
-                : "🤝 Tablas en IA vs IA.",
-            "success"
-        );
-        stopAIVsAI();
-        return;
-    }
-
-    scheduleNextAIVsAIMove(500);
-
-}
-
-
-function executeMoveOnPosition(position, move) {
-
-    const from = move.from;
-    const to = move.to;
-    const movingPiece = position[from.row][from.col];
-    if (!movingPiece) return false;
-
-    position[to.row][to.col] = movingPiece;
-    position[from.row][from.col] = null;
-
-    if (move.enPassant) {
-        position[from.row][to.col] = null;
-    }
-
-    if (move.promotion) {
-        position[to.row][to.col] = {
-            color: movingPiece.color,
-            type: move.promotion
-        };
-    }
-
-    if (movingPiece.type === "king" && Math.abs(to.col - from.col) === 2) {
-        if (to.col > from.col) {
-            position[from.row][5] = position[from.row][7];
-            position[from.row][7] = null;
-        } else {
-            position[from.row][3] = position[from.row][0];
-            position[from.row][0] = null;
-        }
-    }
-
-    return true;
-
-}
-
-
-function getPositionStatusOnBoard(position, color) {
-
-    const moves = getAllLegalMoves(position, color);
-    if (moves.length === 0) {
-        return isKingInCheck(position, color) ? "checkmate" : "stalemate";
-    }
-    return isKingInCheck(position, color) ? "check" : "normal";
-
-}
-
-
-function renderAIVsAIBoard() {
-
-    const target = aiChessBoard || document.getElementById("aiVsAiBoard");
-    if (!target || !aiVsAiBoard) return;
-
-    target.innerHTML = "";
-
-    for (let row = 0; row < 8; row++) {
-        for (let col = 0; col < 8; col++) {
-            const square = document.createElement("div");
-            square.className = "square";
-            square.dataset.row = row;
-            square.dataset.col = col;
-            square.classList.add((row + col) % 2 === 0 ? "light" : "dark");
-
-            const piece = aiVsAiBoard[row][col];
-            if (piece) {
-                square.textContent = PIECES[piece.color][piece.type];
-                square.classList.add(piece.color);
-            }
-
-            if (row === 0 && col === 0) square.classList.add("ai-vs-ai-active");
-            target.appendChild(square);
-        }
-    }
 
 }
 
@@ -10645,14 +10355,6 @@ window.addEventListener(
 
         }
 
-        if (aiVsAiTimer) {
-
-            clearTimeout(
-                aiVsAiTimer
-            );
-
-        }
-
     }
 );
 
@@ -10749,25 +10451,61 @@ function safeGetElement(id) {
 
 function updateStatisticsDisplay() {
 
-    const find = (...ids) => {
-        for (const id of ids) {
-            const el = document.getElementById(id);
-            if (el) return el;
-        }
-        return null;
-    };
-
     const elements = {
-        totalGames: find("totalGames", "gamesPlayed", "statGames", "statisticsGames"),
-        totalWins: find("totalWins", "wins", "statWins", "statisticsWins"),
-        totalMoves: find("totalMoves", "movesPlayed", "statMoves", "statisticsMoves"),
-        goodMoves: find("goodMoves", "goodMovesCount", "statGoodMoves", "statisticsGoodMoves")
+
+        totalGames:
+            safeGetElement("totalGames"),
+
+        totalWins:
+            safeGetElement("totalWins"),
+
+        totalMoves:
+            safeGetElement("totalMoves"),
+
+        goodMoves:
+            safeGetElement("goodMoves")
+
     };
 
-    if (elements.totalGames) elements.totalGames.textContent = totalGames;
-    if (elements.totalWins) elements.totalWins.textContent = totalWins;
-    if (elements.totalMoves) elements.totalMoves.textContent = totalMoves;
-    if (elements.goodMoves) elements.goodMoves.textContent = goodMoves;
+
+    if (
+        elements.totalGames
+    ) {
+
+        elements.totalGames.textContent =
+            totalGames;
+
+    }
+
+
+    if (
+        elements.totalWins
+    ) {
+
+        elements.totalWins.textContent =
+            totalWins;
+
+    }
+
+
+    if (
+        elements.totalMoves
+    ) {
+
+        elements.totalMoves.textContent =
+            totalMoves;
+
+    }
+
+
+    if (
+        elements.goodMoves
+    ) {
+
+        elements.goodMoves.textContent =
+            goodMoves;
+
+    }
 
 }
 
@@ -12360,3 +12098,617 @@ if (
     createGridSizeControl();
 
 }
+
+/* =========================================================
+   PARCHE FINAL DE INTEGRACIÓN HTML + JS
+   - Navegación
+   - Dificultad
+   - Deshacer
+   - IA vs IA
+   - Estadísticas
+   - Evita listeners duplicados
+========================================================= */
+
+let bestScore = 0;
+let statisticsHistory = [];
+let aiCastlingRights = null;
+let aiEnPassantTarget = null;
+
+function loadPersistentStatistics() {
+    try {
+        const saved = JSON.parse(localStorage.getItem("jaquematica_statistics") || "null");
+        if (!saved) return;
+        totalGames = Number(saved.totalGames) || 0;
+        totalWins = Number(saved.totalWins) || 0;
+        bestScore = Number(saved.bestScore) || 0;
+        statisticsHistory = Array.isArray(saved.history) ? saved.history : [];
+    } catch (error) {
+        console.warn("No se pudieron cargar las estadísticas guardadas.", error);
+    }
+}
+
+function savePersistentStatistics() {
+    try {
+        localStorage.setItem("jaquematica_statistics", JSON.stringify({
+            totalGames,
+            totalWins,
+            bestScore,
+            history: statisticsHistory.slice(-50)
+        }));
+    } catch (error) {
+        console.warn("No se pudieron guardar las estadísticas.", error);
+    }
+}
+
+function updateStatisticsDisplay() {
+    const games = document.getElementById("totalGames");
+    const wins = document.getElementById("totalWins");
+    const percentage = document.getElementById("winPercentage");
+    const best = document.getElementById("bestScore");
+    const history = document.getElementById("statisticsHistory");
+
+    if (games) games.textContent = totalGames;
+    if (wins) wins.textContent = totalWins;
+    if (percentage) {
+        percentage.textContent = totalGames > 0
+            ? Math.round((totalWins / totalGames) * 100) + "%"
+            : "0%";
+    }
+    if (best) best.textContent = bestScore;
+
+    if (history) {
+        if (!statisticsHistory.length) {
+            history.innerHTML = `
+                <div class="history-empty">
+                    <span>📊</span>
+                    <p>Todavía no hay partidas registradas.</p>
+                </div>`;
+        } else {
+            history.innerHTML = statisticsHistory.slice().reverse().map(item => `
+                <div class="statistics-history-item">
+                    <strong>${item.result}</strong>
+                    <span>${item.score} puntos · ${item.date}</span>
+                </div>
+            `).join("");
+        }
+    }
+}
+
+function recordStatisticsResult(result) {
+    const score = Math.max(playerScore, 0);
+    bestScore = Math.max(bestScore, score);
+    statisticsHistory.push({
+        result,
+        score,
+        date: new Date().toLocaleString("es-AR")
+    });
+    savePersistentStatistics();
+    updateStatisticsDisplay();
+}
+
+function setDifficulty(newDifficulty) {
+    const allowed = ["easy", "medium", "hard", "expert"];
+    if (!allowed.includes(newDifficulty)) return;
+    difficulty = newDifficulty;
+    updateDifficultyLabel();
+    document.querySelectorAll(".difficulty-button").forEach(button => {
+        button.classList.toggle("active", button.dataset.difficulty === difficulty);
+        button.setAttribute("aria-pressed", button.dataset.difficulty === difficulty ? "true" : "false");
+    });
+    const select = document.getElementById("difficultySelect");
+    if (select) select.value = difficulty;
+    showMessage("Dificultad de la IA: " + newDifficulty, "info");
+}
+
+function initializeDifficulty() {
+    const select = document.getElementById("difficultySelect");
+    if (select && !select.dataset.ready) {
+        select.dataset.ready = "true";
+        select.addEventListener("change", () => setDifficulty(select.value));
+    }
+
+    document.querySelectorAll(".difficulty-button").forEach(button => {
+        if (button.dataset.ready === "true") return;
+        button.dataset.ready = "true";
+        button.addEventListener("click", () => setDifficulty(button.dataset.difficulty));
+    });
+
+    const active = document.querySelector(".difficulty-button.active")?.dataset.difficulty;
+    if (active && ["easy", "medium", "hard", "expert"].includes(active)) {
+        difficulty = active;
+    } else if (select?.value) {
+        difficulty = select.value;
+    }
+    updateDifficultyLabel();
+}
+
+function initializeButtons() {
+    /* La versión anterior registraba dos listeners distintos para deshacer.\n       La integración final se realiza en initializeAllControls(). */
+}
+
+function initializeBoardEvents() {
+    /* renderBoard() ya asigna un click a cada casilla.\n       No agregar otro listener al contenedor. */
+}
+
+function initializeChessBoardClick() {
+    /* renderBoard() ya asigna un click a cada casilla. */
+}
+
+function handleSquareClick(row, col) {
+    if (gameOver || currentTurn !== "white") return;
+    if (!isInsideBoard(row, col)) return;
+
+    const piece = board[row][col];
+
+    if (!selectedSquare) {
+        if (!piece || piece.color !== "white") {
+            showMessage("Seleccioná una pieza blanca.", "error");
+            return;
+        }
+        selectedSquare = { row, col };
+        clearHighlights();
+        highlightSelectedSquare(row, col);
+        showPossibleMoves(row, col);
+        return;
+    }
+
+    if (piece && piece.color === "white") {
+        selectedSquare = { row, col };
+        clearHighlights();
+        highlightSelectedSquare(row, col);
+        showPossibleMoves(row, col);
+        return;
+    }
+
+    const from = { ...selectedSquare };
+    const to = { row, col };
+    selectedSquare = null;
+    clearHighlights();
+    performPlayerMove(from, to);
+}
+
+function initializeUndoSystem() {
+    const button = document.getElementById("undoButton");
+    if (!button) return;
+    button.disabled = undoHistory.length === 0;
+    updateUndoButton();
+}
+
+function updateUndoButton() {
+    const button = document.getElementById("undoButton");
+    if (!button) return;
+    button.disabled = !undoHistory.length;
+    button.classList.toggle("disabled", !undoHistory.length);
+}
+
+function saveGameStateForUndo() {
+    if (!board || !Array.isArray(board)) return;
+    undoHistory.push({
+        board: cloneBoard(board),
+        currentTurn,
+        gameOver,
+        playerScore,
+        aiScore,
+        totalGames,
+        totalWins,
+        totalMoves,
+        goodMoves,
+        moveNumber,
+        halfmoveClock,
+        positionHistory: Array.isArray(positionHistory) ? [...positionHistory] : [],
+        castlingRights: JSON.parse(JSON.stringify(castlingRights)),
+        enPassantTarget: enPassantTarget ? { ...enPassantTarget } : null,
+        lastThreeMoves: [...lastThreeMoves],
+        gridMoves: [...gridMoves],
+        playerTime,
+        aiTime,
+        historyHTML: moveHistory ? moveHistory.innerHTML : ""
+    });
+    if (undoHistory.length > 50) undoHistory.shift();
+    updateUndoButton();
+}
+
+function saveUndoState() {
+    saveGameStateForUndo();
+}
+
+function undoLastMove() {
+    if (!undoHistory.length) {
+        showMessage("No hay movimientos para deshacer.", "warning");
+        return false;
+    }
+
+    if (aiMoveTimeout) {
+        clearTimeout(aiMoveTimeout);
+        aiMoveTimeout = null;
+    }
+
+    const state = undoHistory.pop();
+    board = cloneBoard(state.board);
+    currentTurn = state.currentTurn;
+    gameOver = state.gameOver;
+    playerScore = state.playerScore;
+    aiScore = state.aiScore;
+    totalGames = state.totalGames;
+    totalWins = state.totalWins;
+    totalMoves = state.totalMoves;
+    goodMoves = state.goodMoves;
+    moveNumber = state.moveNumber;
+    halfmoveClock = state.halfmoveClock ?? 0;
+    positionHistory = Array.isArray(state.positionHistory) ? [...state.positionHistory] : [];
+    castlingRights = JSON.parse(JSON.stringify(state.castlingRights));
+    enPassantTarget = state.enPassantTarget ? { ...state.enPassantTarget } : null;
+    lastThreeMoves = [...(state.lastThreeMoves || [])];
+    gridMoves = [...(state.gridMoves || [])];
+    playerTime = state.playerTime;
+    aiTime = state.aiTime;
+    selectedSquare = null;
+    clearHighlights();
+
+    if (moveHistory) moveHistory.innerHTML = state.historyHTML || "";
+    renderBoard();
+    updateScores();
+    updateClockDisplay();
+    updateStatisticsDisplay();
+    updateUndoButton();
+    updateTurnMessage();
+    if (typeof drawAllMoveArrows === "function") drawAllMoveArrows();
+    if (typeof drawGridMoves === "function") drawGridMoves();
+    showMessage("↩️ Movimiento deshecho.", "info");
+    return true;
+}
+
+function initializeNavigation() {
+    document.querySelectorAll(".nav-button[data-section]").forEach(button => {
+        if (button.dataset.ready === "true") return;
+        button.dataset.ready = "true";
+        button.addEventListener("click", () => {
+            const sectionId = button.dataset.section;
+            document.querySelectorAll(".page-section").forEach(section => {
+                section.classList.toggle("active-section", section.id === sectionId);
+            });
+            document.querySelectorAll(".nav-button").forEach(nav => {
+                nav.classList.toggle("active", nav === button);
+            });
+            if (sectionId === "statistics-section") updateStatisticsDisplay();
+            if (sectionId === "ai-section") renderAIBoard();
+        });
+    });
+}
+
+function initializeAIControls() {
+    const button = document.getElementById("startAIGameButton");
+    const speed = document.getElementById("aiSpeedSelect");
+    const level = document.getElementById("aiLevelSelect");
+
+    if (speed && speed.dataset.ready !== "true") {
+        speed.dataset.ready = "true";
+        speed.addEventListener("change", () => {
+            aiSpeed = Math.max(100, Number(speed.value) || 1000);
+            if (aiPlaying && !aiPaused) scheduleAIMove();
+        });
+    }
+
+    if (level && level.dataset.ready !== "true") {
+        level.dataset.ready = "true";
+        level.addEventListener("change", () => {
+            /* El nivel se lee en cada movimiento. */
+        });
+    }
+
+    if (button && button.dataset.ready !== "true") {
+        button.dataset.ready = "true";
+        button.addEventListener("click", () => {
+            if (!aiPlaying) startAIVsAI();
+            else if (aiPaused) resumeAIVsAI();
+            else pauseAIVsAI();
+        });
+    }
+}
+
+function resetAIBoard() {
+    aiBoard = createInitialBoard();
+    aiTurn = "white";
+    aiMoveCount = 0;
+    aiCastlingRights = {
+        whiteKing: true, whiteRookKing: true, whiteRookQueen: true,
+        blackKing: true, blackRookKing: true, blackRookQueen: true
+    };
+    aiEnPassantTarget = null;
+    const history = document.getElementById("aiMoveHistory");
+    if (history) history.innerHTML = `<div class="history-empty"><span>🤖</span><p>La partida todavía no comenzó.</p></div>`;
+    setAIMessage("Presioná iniciar para comenzar.");
+    renderAIBoard();
+}
+
+function setAIMessage(text) {
+    const el = document.getElementById("aiGameMessageText");
+    if (el) el.textContent = text;
+}
+
+function renderAIBoard() {
+    const element = document.getElementById("aiChessBoard");
+    if (!element || !Array.isArray(aiBoard) || aiBoard.length !== 8) return;
+    element.innerHTML = "";
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            const square = document.createElement("div");
+            square.className = "chess-square " + ((row + col) % 2 === 0 ? "light-square" : "dark-square");
+            square.dataset.row = row;
+            square.dataset.col = col;
+            const piece = aiBoard[row][col];
+            if (piece) {
+                const span = document.createElement("span");
+                span.className = "chess-piece " + piece.color;
+                span.textContent = PIECES[piece.color][piece.type];
+                square.appendChild(span);
+            }
+            element.appendChild(square);
+        }
+    }
+}
+
+function chooseAIMoveForBoard(position, color, level) {
+    const oldBoard = board;
+    const oldDifficulty = difficulty;
+    const oldRights = castlingRights;
+    const oldEnPassant = enPassantTarget;
+    board = position;
+    difficulty = level;
+    castlingRights = aiCastlingRights || castlingRights;
+    enPassantTarget = aiEnPassantTarget;
+    const moves = getAllLegalMoves(position, color);
+    const selected = chooseAIMove(moves);
+    board = oldBoard;
+    difficulty = oldDifficulty;
+    castlingRights = oldRights;
+    enPassantTarget = oldEnPassant;
+    return selected;
+}
+
+function executeAIMoveOnBoard(move) {
+    const oldBoard = board;
+    const oldRights = castlingRights;
+    const oldEnPassant = enPassantTarget;
+    board = aiBoard;
+    castlingRights = aiCastlingRights;
+    enPassantTarget = aiEnPassantTarget;
+    const result = executeMoveOnBoard(move);
+    aiBoard = board;
+    aiCastlingRights = castlingRights;
+    aiEnPassantTarget = enPassantTarget;
+    board = oldBoard;
+    castlingRights = oldRights;
+    enPassantTarget = oldEnPassant;
+    return result;
+}
+
+function getAIVsAILevel() {
+    const value = Number(document.getElementById("aiLevelSelect")?.value || 2);
+    return ["easy", "medium", "hard", "expert"][Math.max(1, Math.min(4, value)) - 1];
+}
+
+function addAIMoveToHistory(text, color) {
+    const history = document.getElementById("aiMoveHistory");
+    if (!history) return;
+    if (history.querySelector(".history-empty")) history.innerHTML = "";
+    const item = document.createElement("div");
+    item.className = "history-move";
+    item.innerHTML = `<span>${color === "white" ? "IA Blanca" : "IA Negra"}</span><strong>${text}</strong>`;
+    history.appendChild(item);
+    history.scrollTop = history.scrollHeight;
+}
+
+function scheduleAIMove() {
+    if (!aiPlaying || aiPaused) return;
+    if (aiMoveTimer) clearTimeout(aiMoveTimer);
+    aiMoveTimer = setTimeout(makeAIVsAIMove, aiSpeed);
+}
+
+function makeAIVsAIMove() {
+    aiMoveTimer = null;
+    if (!aiPlaying || aiPaused) return;
+
+    const color = aiTurn;
+    const level = getAIVsAILevel();
+    const moves = (() => {
+        const oldBoard = board;
+        const oldRights = castlingRights;
+        const oldEnPassant = enPassantTarget;
+        board = aiBoard;
+        castlingRights = aiCastlingRights;
+        enPassantTarget = aiEnPassantTarget;
+        const result = getAllLegalMoves(aiBoard, color);
+        board = oldBoard;
+        castlingRights = oldRights;
+        enPassantTarget = oldEnPassant;
+        return result;
+    })();
+
+    if (!moves.length) {
+        aiPlaying = false;
+        aiPaused = false;
+        setAIMessage(isKingInCheck(aiBoard, color) ? `${color === "white" ? "IA Blanca" : "IA Negra"} recibió jaque mate.` : "Tablas por rey ahogado.");
+        updateAIGameButton();
+        return;
+    }
+
+    const move = chooseAIMoveForBoard(aiBoard, color, level);
+    if (!move) return;
+
+    const movingPiece = aiBoard[move.from.row][move.from.col];
+    const text = createMoveNotation(move.from, move.to, movingPiece);
+    executeAIMoveOnBoard(move);
+    aiMoveCount++;
+    addAIMoveToHistory(text, color);
+    renderAIBoard();
+
+    const opponent = getOpponentColor(color);
+    const status = (() => {
+        const oldBoard = board;
+        const oldRights = castlingRights;
+        const oldEnPassant = enPassantTarget;
+        board = aiBoard;
+        castlingRights = aiCastlingRights;
+        enPassantTarget = aiEnPassantTarget;
+        const result = getCurrentPositionStatus(opponent);
+        board = oldBoard;
+        castlingRights = oldRights;
+        enPassantTarget = oldEnPassant;
+        return result;
+    })();
+
+    if (status === "checkmate" || status === "stalemate") {
+        aiPlaying = false;
+        aiPaused = false;
+        setAIMessage(status === "checkmate" ? `${opponent === "white" ? "IA Negra" : "IA Blanca"} ganó por jaque mate.` : "Tablas por rey ahogado.");
+        updateAIGameButton();
+        return;
+    }
+
+    aiTurn = opponent;
+    setAIMessage(`${aiTurn === "white" ? "IA Blanca" : "IA Negra"} está pensando...`);
+    scheduleAIMove();
+}
+
+function updateAIGameButton() {
+    const button = document.getElementById("startAIGameButton");
+    if (!button) return;
+    if (!aiPlaying) button.textContent = "▶ Iniciar partida";
+    else if (aiPaused) button.textContent = "▶ Reanudar";
+    else button.textContent = "⏸ Pausar";
+}
+
+function startAIVsAI() {
+    if (aiMoveTimer) clearTimeout(aiMoveTimer);
+    resetAIBoard();
+    aiPlaying = true;
+    aiPaused = false;
+    setAIMessage("IA Blanca está pensando...");
+    updateAIGameButton();
+    scheduleAIMove();
+}
+
+function pauseAIVsAI() {
+    aiPaused = true;
+    if (aiMoveTimer) {
+        clearTimeout(aiMoveTimer);
+        aiMoveTimer = null;
+    }
+    setAIMessage("Partida pausada.");
+    updateAIGameButton();
+}
+
+function resumeAIVsAI() {
+    if (!aiPlaying) return startAIVsAI();
+    aiPaused = false;
+    setAIMessage(`${aiTurn === "white" ? "IA Blanca" : "IA Negra"} está pensando...`);
+    updateAIGameButton();
+    scheduleAIMove();
+}
+
+function initializeAllControls() {
+    initializeDifficulty();
+    initializeNewGameButton();
+    initializeHintButton();
+    initializeNavigation();
+    initializeAIControls();
+    initializeUndoButton();
+    initializeUndoSystem();
+}
+
+function initializeUndoButton() {
+    const button = document.getElementById("undoButton");
+    if (!button || button.dataset.finalReady === "true") return;
+    button.dataset.finalReady = "true";
+    button.addEventListener("click", () => undoLastMove());
+    updateUndoButton();
+}
+
+function startChessGame() {
+    if (window.__JAQUEMATICA_STARTED__) return;
+    window.__JAQUEMATICA_STARTED__ = true;
+    loadPersistentStatistics();
+    initializeGame();
+    if (!Array.isArray(board) || board.length !== 8 || !validateKings()) {
+        board = createInitialBoard();
+    }
+    renderBoard();
+    updateEverything();
+    updateStatisticsDisplay();
+    resetAIBoard();
+    initializeAllControls();
+    showWelcomeMessage();
+}
+
+function bootChessGame() {
+    startChessGame();
+}
+
+/* Evitar que el sistema anterior use el botón inexistente #undoMoveButton. */
+function initializeRestartButton() {}
+
+/* Actualizar contador de movimientos una sola vez. */
+function updateMoveCounter() {
+    totalMoves++;
+    const counter = document.getElementById("moveCounter");
+    if (counter) counter.textContent = totalMoves;
+    updateStatisticsDisplay();
+}
+
+function registerGoodMove() {
+    goodMoves++;
+    const good = document.getElementById("goodMoves");
+    if (good) good.textContent = goodMoves;
+}
+
+/* Corrección del selector de tiempo: evita listeners duplicados. */
+function initializeGameTimeSelector() {
+    const select = document.getElementById("gameTimeSelect");
+    if (!select) return;
+    if (select.dataset.finalReady !== "true") {
+        select.dataset.finalReady = "true";
+        select.addEventListener("change", changeGameTime);
+    }
+    setupGameClock();
+}
+
+/* Reemplazar el final de partida para que las estadísticas visibles se actualicen. */
+const __originalEndGame = endGame;
+endGame = function(winner, reason = "normal") {
+    const wasOver = gameOver;
+    __originalEndGame(winner, reason);
+    if (!wasOver && gameOver) {
+        if (winner === "player") {
+            recordStatisticsResult("Victoria");
+        } else {
+            recordStatisticsResult(reason === "stalemate" ? "Tablas" : "Derrota");
+        }
+    }
+    updateStatisticsDisplay();
+};
+
+/* Mantener estadísticas al reiniciar una partida. */
+const __originalResetGame = resetGame;
+resetGame = function() {
+    __originalResetGame();
+    resetUndoSystem();
+    updateStatisticsDisplay();
+    updateUndoButton();
+};
+
+/* Guardar estadísticas cada vez que cambia la puntuación. */
+const __originalUpdateScores = updateScores;
+updateScores = function() {
+    __originalUpdateScores();
+    bestScore = Math.max(bestScore, playerScore);
+    updateStatisticsDisplay();
+};
+
+/* Exponer IA vs IA para depuración y botones externos. */
+window.JAQUEMATICA = window.JAQUEMATICA || {};
+window.JAQUEMATICA.startAIVsAI = startAIVsAI;
+window.JAQUEMATICA.pauseAIVsAI = pauseAIVsAI;
+window.JAQUEMATICA.resumeAIVsAI = resumeAIVsAI;
+window.JAQUEMATICA.setDifficulty = setDifficulty;
+window.JAQUEMATICA.updateStatistics = updateStatisticsDisplay;
