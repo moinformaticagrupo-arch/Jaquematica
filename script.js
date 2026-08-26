@@ -11435,3 +11435,26 @@ if (
     createGridSizeControl();
 
 }
+function initializeDifficultyButtons() {
+
+    document
+        .querySelectorAll("[data-difficulty]")
+        .forEach(button => {
+
+            button.addEventListener("click", () => {
+
+                const level =
+                    button.dataset.difficulty;
+
+                setDifficulty(level);
+
+            });
+
+        });
+
+}
+
+document.addEventListener(
+    "DOMContentLoaded",
+    initializeDifficultyButtons
+);
