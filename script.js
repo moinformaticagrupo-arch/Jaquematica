@@ -678,7 +678,7 @@ function drawGridMoves() {
 
     const canvas =
         document.getElementById(
-            "gridCanvas"
+            "gridBoard"
         );
 
     const boardElement =
@@ -5069,9 +5069,17 @@ function setDifficulty(
     }
 
 
-    difficulty =
-        newDifficulty;
+    newDifficulty = String(newDifficulty).toLowerCase().trim();
 
+    const allowed = ["easy", "medium", "hard", "expert"];
+    if (!allowed.includes(newDifficulty)) {
+        return;
+    }
+
+    difficulty = newDifficulty;
+
+    const select = document.getElementById("difficultySelect");
+    if (select) select.value = newDifficulty;
 
     updateDifficultyLabel();
 
@@ -5848,7 +5856,45 @@ function initializeBoardEvents() {
    INICIALIZAR BOTONES
 ========================================================= */
 
+function initializeDifficultyButtons() {
+
+    const buttons = document.querySelectorAll(
+        "[data-difficulty], .difficulty-button"
+    );
+
+    buttons.forEach(button => {
+
+        if (button.dataset.difficultyInitialized === "true") return;
+
+        button.dataset.difficultyInitialized = "true";
+
+        button.addEventListener("click", event => {
+            event.preventDefault();
+
+            const value =
+                button.dataset.difficulty ||
+                button.getAttribute("data-level") ||
+                button.value;
+
+            if (!value) return;
+
+            setDifficulty(String(value).toLowerCase());
+
+            buttons.forEach(item => item.classList.remove("active", "selected"));
+            button.classList.add("active", "selected");
+
+            const select = document.getElementById("difficultySelect");
+            if (select && [...select.options].some(option => option.value === value)) {
+                select.value = value;
+            }
+        });
+    });
+
+}
+
 function initializeButtons() {
+
+    initializeDifficultyButtons();
 
     /* =====================================================
        BOTÓN DESHACER
@@ -5856,7 +5902,7 @@ function initializeButtons() {
 
     const undoButton =
         document.getElementById(
-            "undoMoveButton"
+            "undoButton"
         );
 
 
@@ -6669,6 +6715,8 @@ function undoLastMove() {
 
     }
 
+    updateUndoButton();
+
 }
 
 
@@ -6832,7 +6880,7 @@ function updateUndoButton() {
 
     const button =
         document.getElementById(
-            "undoMoveButton"
+            "undoButton"
         );
 
 
@@ -7028,7 +7076,7 @@ function initializeUndoSystem() {
 
     const button =
         document.getElementById(
-            "undoMoveButton"
+            "undoButton"
         );
 
 
@@ -9707,7 +9755,7 @@ function initializeUndoButton() {
 
     const button =
         document.getElementById(
-            "undoMoveButton"
+            "undoButton"
         );
 
 
@@ -11435,26 +11483,265 @@ if (
     createGridSizeControl();
 
 }
-function initializeDifficultyButtons() {
+function drawGridMoves() {
+    const canvas = document.getElementById("gridBoard");
 
-    document
-        .querySelectorAll("[data-difficulty]")
-        .forEach(button => {
+    if (!canvas) {
+        console.warn("No se encontró #gridBoard");
+        return;
+    }
 
-            button.addEventListener("click", () => {
+    canvas.style.display = "block";
+    canvas.style.visibility = "visible";
 
-                const level =
-                    button.dataset.difficulty;
+    let rect = canvas.getBoundingClientRect();
 
-                setDifficulty(level);
+    let width = rect.width;
+    let height = rect.height;
 
-            });
+    // Si todavía no tiene tamaño, darle uno
+    if (width <= 0) width = 320;
+    if (height <= 0) height = 320;
 
-        });
+    // La cuadrícula siempre será cuadrada
+    const size = Math.max(200, Math.min(width, height));
 
+    canvas.style.width = size + "px";
+    canvas.style.height = size + "px";
+
+    const dpr = window.devicePixelRatio || 1;
+
+    canvas.width = Math.round(size * dpr);
+    canvas.height = Math.round(size * dpr);
+
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) return;
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
+    ctx.clearRect(
+        0,
+        0,
+        size,
+        size
+    );
+
+    /*
+    ==========================================
+    FONDO
+    ==========================================
+    */
+
+    ctx.fillStyle = "#07111f";
+
+    ctx.fillRect(
+        0,
+        0,
+        size,
+        size
+    );
+
+    /*
+    ==========================================
+    CUADRÍCULA 8 x 8
+    ==========================================
+    */
+
+    const cell = size / 8;
+
+    ctx.strokeStyle =
+        "rgba(79, 140, 255, 0.75)";
+
+    ctx.lineWidth = 1;
+
+    for (let i = 0; i <= 8; i++) {
+
+        const p = i * cell;
+
+        // Línea vertical
+        ctx.beginPath();
+        ctx.moveTo(p, 0);
+        ctx.lineTo(p, size);
+        ctx.stroke();
+
+        // Línea horizontal
+        ctx.beginPath();
+        ctx.moveTo(0, p);
+        ctx.lineTo(size, p);
+        ctx.stroke();
+    }
+
+    /*
+    ==========================================
+    COORDENADAS
+    ==========================================
+    */
+
+    const letras = [
+        "a", "b", "c", "d",
+        "e", "f", "g", "h"
+    ];
+
+    const numeros = [
+        "8", "7", "6", "5",
+        "4", "3", "2", "1"
+    ];
+
+    ctx.fillStyle =
+        "rgba(255,255,255,0.85)";
+
+    ctx.font =
+        `${Math.max(10, cell * 0.22)}px Arial`;
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    // Letras abajo
+    for (let col = 0; col < 8; col++) {
+
+        ctx.fillText(
+            letras[col],
+            col * cell + cell / 2,
+            size - cell * 0.12
+        );
+    }
+
+    // Números a la izquierda
+    for (let row = 0; row < 8; row++) {
+
+        ctx.fillText(
+            numeros[row],
+            cell * 0.12,
+            row * cell + cell / 2
+        );
+    }
+
+    /*
+    ==========================================
+    MOVIMIENTOS
+    ==========================================
+    */
+
+    if (!Array.isArray(gridMoves)) {
+        return;
+    }
+
+    gridMoves.forEach(move => {
+
+        if (
+            move.fromRow === undefined ||
+            move.fromCol === undefined ||
+            move.toRow === undefined ||
+            move.toCol === undefined
+        ) {
+            return;
+        }
+
+        const startX =
+            move.fromCol * cell +
+            cell / 2;
+
+        const startY =
+            move.fromRow * cell +
+            cell / 2;
+
+        const endX =
+            move.toCol * cell +
+            cell / 2;
+
+        const endY =
+            move.toRow * cell +
+            cell / 2;
+
+        /*
+        Línea de movimiento
+        */
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            startX,
+            startY
+        );
+
+        ctx.lineTo(
+            endX,
+            endY
+        );
+
+        ctx.strokeStyle =
+            "rgba(255,193,7,0.95)";
+
+        ctx.lineWidth = 4;
+
+        ctx.lineCap = "round";
+
+        ctx.stroke();
+
+        /*
+        Punta de flecha
+        */
+
+        const angle =
+            Math.atan2(
+                endY - startY,
+                endX - startX
+            );
+
+        const arrowSize =
+            Math.min(
+                14,
+                cell * 0.25
+            );
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            endX,
+            endY
+        );
+
+        ctx.lineTo(
+            endX -
+                arrowSize *
+                Math.cos(
+                    angle - Math.PI / 6
+                ),
+
+            endY -
+                arrowSize *
+                Math.sin(
+                    angle - Math.PI / 6
+                )
+        );
+
+        ctx.lineTo(
+            endX -
+                arrowSize *
+                Math.cos(
+                    angle + Math.PI / 6
+                ),
+
+            endY -
+                arrowSize *
+                Math.sin(
+                    angle + Math.PI / 6
+                )
+        );
+
+        ctx.closePath();
+
+        ctx.fillStyle =
+            "rgba(255,193,7,0.95)";
+
+        ctx.fill();
+    });
 }
-
-document.addEventListener(
-    "DOMContentLoaded",
-    initializeDifficultyButtons
-);
