@@ -6880,7 +6880,7 @@ function updateUndoButton() {
 
     const button =
         document.getElementById(
-            "undoButton"
+            "undoMoveButton"
         );
 
 
