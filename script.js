@@ -1374,9 +1374,9 @@ function isPawnMove(position, from, to, piece) {
         from.row === startRow &&
         !target &&
         !position[
-            from.row + direction
+        from.row + direction
         ][
-            from.col
+        from.col
         ]
     ) {
 
@@ -1471,9 +1471,9 @@ function isPseudoLegalMove(
 
     const piece =
         position[
-            from.row
+        from.row
         ][
-            from.col
+        from.col
         ];
 
 
@@ -1486,9 +1486,9 @@ function isPseudoLegalMove(
 
     const target =
         position[
-            to.row
+        to.row
         ][
-            to.col
+        to.col
         ];
 
 
@@ -2004,9 +2004,9 @@ function getEnPassantMove(
     const capturedPawn =
 
         position[
-            from.row
+        from.row
         ][
-            to.col
+        to.col
         ];
 
 
@@ -2053,9 +2053,9 @@ function simulateMove(
 
     const piece =
         copy[
-            move.from.row
+        move.from.row
         ][
-            move.from.col
+        move.from.col
         ];
 
 
@@ -2192,9 +2192,9 @@ function isLegalMove(
 
     const piece =
         position[
-            from.row
+        from.row
         ][
-            from.col
+        from.col
         ];
 
 
@@ -2207,9 +2207,9 @@ function isLegalMove(
 
     const target =
         position[
-            to.row
+        to.row
         ][
-            to.col
+        to.col
         ];
 
 
@@ -2748,9 +2748,9 @@ function showPossibleMoves(
                 if (
 
                     board[
-                        move.to.row
+                    move.to.row
                     ][
-                        move.to.col
+                    move.to.col
                     ]
 
                 ) {
@@ -2940,7 +2940,7 @@ function handleSquareClick(row, col) {
     }
 
 
-    makePlayerMove(
+    performPlayerMove(
         from,
         to
     );
@@ -3174,9 +3174,9 @@ function executeMoveOnBoard(move) {
 
     const movingPiece =
         board[
-            from.row
+        from.row
         ][
-            from.col
+        from.col
         ];
 
 
@@ -3195,9 +3195,9 @@ function executeMoveOnBoard(move) {
 
     let capturedPiece =
         board[
-            to.row
+        to.row
         ][
-            to.col
+        to.col
         ];
 
 
@@ -3246,9 +3246,9 @@ function executeMoveOnBoard(move) {
 
         capturedPiece =
             board[
-                from.row
+            from.row
             ][
-                to.col
+            to.col
             ];
 
 
@@ -3588,20 +3588,6 @@ function makePlayerMove(
 
 
     /* =====================================================
-       INICIAR RELOJ
-    ===================================================== */
-
-    if (
-        typeof startGameClock ===
-        "function"
-    ) {
-
-        startGameClock();
-
-    }
-
-
-    /* =====================================================
        BUSCAR EL MOVIMIENTO LEGAL REAL
     ===================================================== */
 
@@ -3618,16 +3604,16 @@ function makePlayerMove(
             candidate =>
 
                 candidate.from.row ===
-                    from.row &&
+                from.row &&
 
                 candidate.from.col ===
-                    from.col &&
+                from.col &&
 
                 candidate.to.row ===
-                    to.row &&
+                to.row &&
 
                 candidate.to.col ===
-                    to.col
+                to.col
 
         );
 
@@ -3650,9 +3636,9 @@ function makePlayerMove(
 
     const movingPiece =
         board[
-            from.row
+        from.row
         ][
-            from.col
+        from.col
         ];
 
 
@@ -3665,15 +3651,15 @@ function makePlayerMove(
         move.enPassant
 
             ? board[
-                from.row
+            from.row
             ][
-                to.col
+            to.col
             ]
 
             : board[
-                to.row
+            to.row
             ][
-                to.col
+            to.col
             ];
 
 
@@ -3726,7 +3712,7 @@ function makePlayerMove(
         playerScore +=
 
             PIECE_VALUES[
-                capturedPiece.type
+            capturedPiece.type
             ] * 10;
 
     } else {
@@ -3903,9 +3889,9 @@ function makeAIMove() {
 
     const movingPiece =
         board[
-            selectedMove.from.row
+        selectedMove.from.row
         ][
-            selectedMove.from.col
+        selectedMove.from.col
         ];
 
 
@@ -3918,15 +3904,15 @@ function makeAIMove() {
         selectedMove.enPassant
 
             ? board[
-                selectedMove.from.row
+            selectedMove.from.row
             ][
-                selectedMove.to.col
+            selectedMove.to.col
             ]
 
             : board[
-                selectedMove.to.row
+            selectedMove.to.row
             ][
-                selectedMove.to.col
+            selectedMove.to.col
             ];
 
 
@@ -3973,7 +3959,7 @@ function makeAIMove() {
 
         aiScore +=
             PIECE_VALUES[
-                capturedPiece.type
+            capturedPiece.type
             ] * 10;
 
     }
@@ -4229,15 +4215,15 @@ function chooseAIMove(moves) {
                         move.enPassant
 
                             ? board[
-                                move.from.row
+                            move.from.row
                             ][
-                                move.to.col
+                            move.to.col
                             ]
 
                             : board[
-                                move.to.row
+                            move.to.row
                             ][
-                                move.to.col
+                            move.to.col
                             ];
 
 
@@ -4247,7 +4233,7 @@ function chooseAIMove(moves) {
 
                         score +=
                             PIECE_VALUES[
-                                target.type
+                            target.type
                             ] * 10;
 
                     }
@@ -4378,15 +4364,15 @@ function findBestMove(
             move.enPassant
 
                 ? position[
-                    move.from.row
+                move.from.row
                 ][
-                    move.to.col
+                move.to.col
                 ]
 
                 : position[
-                    move.to.row
+                move.to.row
                 ][
-                    move.to.col
+                move.to.col
                 ];
 
 
@@ -4402,7 +4388,7 @@ function findBestMove(
 
             score +=
                 PIECE_VALUES[
-                    captured.type
+                captured.type
                 ] * 20;
 
         }
@@ -4499,7 +4485,7 @@ function evaluatePosition(
 
             const value =
                 PIECE_VALUES[
-                    piece.type
+                piece.type
                 ];
 
 
@@ -4691,15 +4677,15 @@ function createMoveNotation(
 
     const letter =
         pieceLetters[
-            piece.type
+        piece.type
         ] || "";
 
 
     const target =
         board[
-            to.row
+        to.row
         ][
-            to.col
+        to.col
         ];
 
 
@@ -4798,8 +4784,13 @@ function addMoveToHistory(
     }
 
 
+    const numberLabel =
+        player === "ai"
+            ? `${moveNumber}...`
+            : `${moveNumber}.`;
+
     item.textContent =
-        `${moveNumber}. ${text}`;
+        `${numberLabel} ${text}`;
 
 
     moveHistory.appendChild(
@@ -4807,16 +4798,10 @@ function addMoveToHistory(
     );
 
 
-    /* =====================================================
-       CADA DOS MOVIMIENTOS AUMENTA EL NÚMERO
-    ===================================================== */
+    /* El número avanza una sola vez, después de la jugada de la IA. */
 
-    if (
-        player === "ai"
-    ) {
-
+    if (player === "ai") {
         moveNumber++;
-
     }
 
 
@@ -5154,7 +5139,7 @@ function formatTime(seconds) {
     const remainingSeconds = seconds % 60;
 
     return String(minutes).padStart(2, "0") + ":" +
-           String(remainingSeconds).padStart(2, "0");
+        String(remainingSeconds).padStart(2, "0");
 }
 
 function startGameClock() {
@@ -6084,10 +6069,10 @@ function showHint() {
 
         hintMove =
             legalMoves[
-                Math.floor(
-                    Math.random() *
-                    legalMoves.length
-                )
+            Math.floor(
+                Math.random() *
+                legalMoves.length
+            )
             ];
 
     }
@@ -6603,6 +6588,22 @@ function undoLastMove() {
 
 
     /* =====================================================
+       RESTAURAR ESTADO DEL RELOJ
+    ===================================================== */
+
+    const shouldResumeClock =
+        previousState.clockStarted === true;
+
+    if (gameTimer) {
+        clearInterval(gameTimer);
+        gameTimer = null;
+    }
+
+    clockStarted = false;
+    clockLastUpdate = 0;
+
+
+    /* =====================================================
        LIMPIAR SELECCIÓN
     ===================================================== */
 
@@ -6703,16 +6704,24 @@ function undoLastMove() {
 
 
     /* =====================================================
-       REINICIAR RELOJ SI LA PARTIDA SIGUE ACTIVA
+       REANUDAR RELOJ Y, SI CORRESPONDE, LA IA
     ===================================================== */
 
-    if (
-        !gameOver &&
-        !clockStarted
-    ) {
-
+    if (!gameOver && shouldResumeClock) {
         startGameClock();
+    }
 
+    /* Si el estado restaurado era turno de la IA, no dejamos
+       la partida detenida al cancelar el timeout anterior. */
+    if (!gameOver && currentTurn === "black") {
+        if (aiMoveTimeout) {
+            clearTimeout(aiMoveTimeout);
+        }
+
+        aiMoveTimeout = setTimeout(
+            makeAIMove,
+            getAIDelay()
+        );
     }
 
     updateUndoButton();
@@ -6812,6 +6821,10 @@ function saveUndoState() {
             aiTime,
 
 
+        clockStarted:
+            clockStarted,
+
+
         historyHTML:
             moveHistory
                 ? moveHistory.innerHTML
@@ -6880,7 +6893,7 @@ function updateUndoButton() {
 
     const button =
         document.getElementById(
-            "undoMoveButton"
+            "undoButton"
         );
 
 
@@ -7039,6 +7052,10 @@ function saveGameStateForUndo() {
 
         aiTime:
             aiTime,
+
+
+        clockStarted:
+            clockStarted,
 
 
         historyHTML:
@@ -7922,9 +7939,9 @@ function isPromotionMove(
 
     const piece =
         board[
-            move.from.row
+        move.from.row
         ][
-            move.from.col
+        move.from.col
         ];
 
 
@@ -8008,9 +8025,9 @@ function isCastlingMove(
 
     const piece =
         board[
-            move.from.row
+        move.from.row
         ][
-            move.from.col
+        move.from.col
         ];
 
 
@@ -8129,13 +8146,13 @@ function getSpecialMoveNotation(
         return (
 
             files[
-                move.from.col
+            move.from.col
             ] +
 
             "x" +
 
             files[
-                move.to.col
+            move.to.col
             ] +
 
             (
@@ -8183,9 +8200,9 @@ function getFullMoveNotation(
 
     const piece =
         board[
-            move.from.row
+        move.from.row
         ][
-            move.from.col
+        move.from.col
         ];
 
 
@@ -8374,9 +8391,9 @@ function evaluatePlayerMove(
 
     const movingPiece =
         board[
-            move.from.row
+        move.from.row
         ][
-            move.from.col
+        move.from.col
         ];
 
 
@@ -8425,9 +8442,9 @@ function evaluatePlayerMove(
 
     if (
         board[
-            move.to.row
+        move.to.row
         ][
-            move.to.col
+        move.to.col
         ]
     ) {
 
@@ -8723,7 +8740,7 @@ function finishPlayerTurn(
         "black";
 
     if (clockStarted) {
-        clockLastUpdate = performance.now();
+        clockLastUpdate = Date.now();
     }
 
 
@@ -8825,7 +8842,7 @@ function finishAITurn(
         "white";
 
     if (clockStarted) {
-        clockLastUpdate = performance.now();
+        clockLastUpdate = Date.now();
     }
 
 
@@ -9138,14 +9155,24 @@ function performPlayerMove(
 
 
     /* =====================================================
+       INICIAR RELOJ AL REALIZAR LA PRIMERA JUGADA
+       (no al seleccionar una pieza)
+    ===================================================== */
+
+    if (typeof startGameClock === "function") {
+        startGameClock();
+    }
+
+
+    /* =====================================================
        PIEZA ANTES DEL MOVIMIENTO
     ===================================================== */
 
     const movingPiece =
         board[
-            legalMove.from.row
+        legalMove.from.row
         ][
-            legalMove.from.col
+        legalMove.from.col
         ];
 
 
@@ -9156,6 +9183,24 @@ function performPlayerMove(
     }
 
 
+    const movingPieceType =
+        movingPiece.type;
+
+
+    const capturedPiece =
+        legalMove.enPassant
+            ? board[
+                legalMove.from.row
+            ][
+                legalMove.to.col
+            ]
+            : board[
+                legalMove.to.row
+            ][
+                legalMove.to.col
+            ];
+
+
     /* =====================================================
        REALIZAR MOVIMIENTO
     ===================================================== */
@@ -9164,22 +9209,22 @@ function performPlayerMove(
         legalMove
     );
 
-/* =====================================================
-   REGLA DE LOS 50 MOVIMIENTOS
-===================================================== */
+    /* =====================================================
+       REGLA DE LOS 50 MOVIMIENTOS
+    ===================================================== */
 
-if (
-    movingPieceType === "pawn" ||
-    capturedPiece
-) {
+    if (
+        movingPieceType === "pawn" ||
+        capturedPiece
+    ) {
 
-    halfmoveClock = 0;
+        halfmoveClock = 0;
 
-} else {
+    } else {
 
-    halfmoveClock++;
+        halfmoveClock++;
 
-}
+    }
     /* =====================================================
        REGISTRAR MOVIMIENTO
     ===================================================== */
@@ -9326,7 +9371,7 @@ if (
         "black";
 
     if (clockStarted) {
-        clockLastUpdate = performance.now();
+        clockLastUpdate = Date.now();
     }
 
 
@@ -9608,7 +9653,7 @@ function initializeKeyboardControls() {
 
     document.addEventListener(
         "keydown",
-        function(event) {
+        function (event) {
 
             /* ESC = cancelar selección */
 
@@ -9692,7 +9737,7 @@ function initializeNewGameButton() {
 
     button.addEventListener(
         "click",
-        function() {
+        function () {
 
             resetGame();
 
@@ -9737,7 +9782,7 @@ function initializeRestartButton() {
 
     button.addEventListener(
         "click",
-        function() {
+        function () {
 
             resetGame();
 
@@ -9767,7 +9812,7 @@ function initializeUndoButton() {
 
 
     if (
-        button.dataset.ready ===
+        button.dataset.initialized ===
         "true"
     ) {
 
@@ -9776,13 +9821,13 @@ function initializeUndoButton() {
     }
 
 
-    button.dataset.ready =
+    button.dataset.initialized =
         "true";
 
 
     button.addEventListener(
         "click",
-        function() {
+        function () {
 
             undoLastMove();
 
@@ -9830,7 +9875,7 @@ function initializeHintButton() {
 
     button.addEventListener(
         "click",
-        function() {
+        function () {
 
             showHint();
 
@@ -10037,10 +10082,10 @@ else {
 
 window.addEventListener(
     "resize",
-    function() {
+    function () {
 
         setTimeout(
-            function() {
+            function () {
 
                 if (
                     typeof drawAllMoveArrows ===
@@ -10075,7 +10120,7 @@ window.addEventListener(
 
 window.addEventListener(
     "beforeunload",
-    function() {
+    function () {
 
         if (gameTimer) {
 
@@ -10165,8 +10210,8 @@ function getGameDebugInfo() {
 
 window.getChessDebug =
     getGameDebugInfo;
-    /* =========================================================
-   FUNCIONES DE SEGURIDAD Y COMPATIBILIDAD
+/* =========================================================
+FUNCIONES DE SEGURIDAD Y COMPATIBILIDAD
 ========================================================= */
 
 
@@ -10899,9 +10944,9 @@ function validateMoveBeforeExecution(
 
     const piece =
         board[
-            move.from.row
+        move.from.row
         ][
-            move.from.col
+        move.from.col
         ];
 
 
@@ -11185,7 +11230,7 @@ function bootChessGame() {
 
 window.addEventListener(
     "load",
-    function() {
+    function () {
 
         /*
            Si la partida ya fue iniciada por
@@ -11218,42 +11263,42 @@ window.addEventListener(
 
 window.JAQUEMATICA = {
 
-    getBoard: function() {
+    getBoard: function () {
 
         return board;
 
     },
 
 
-    getState: function() {
+    getState: function () {
 
         return getCurrentGameState();
 
     },
 
 
-    reset: function() {
+    reset: function () {
 
         resetGame();
 
     },
 
 
-    undo: function() {
+    undo: function () {
 
         undoLastMove();
 
     },
 
 
-    hint: function() {
+    hint: function () {
 
         showHint();
 
     },
 
 
-    debug: function() {
+    debug: function () {
 
         return getGameDebugInfo();
 
@@ -11711,30 +11756,30 @@ function drawGridMoves() {
 
         ctx.lineTo(
             endX -
-                arrowSize *
-                Math.cos(
-                    angle - Math.PI / 6
-                ),
+            arrowSize *
+            Math.cos(
+                angle - Math.PI / 6
+            ),
 
             endY -
-                arrowSize *
-                Math.sin(
-                    angle - Math.PI / 6
-                )
+            arrowSize *
+            Math.sin(
+                angle - Math.PI / 6
+            )
         );
 
         ctx.lineTo(
             endX -
-                arrowSize *
-                Math.cos(
-                    angle + Math.PI / 6
-                ),
+            arrowSize *
+            Math.cos(
+                angle + Math.PI / 6
+            ),
 
             endY -
-                arrowSize *
-                Math.sin(
-                    angle + Math.PI / 6
-                )
+            arrowSize *
+            Math.sin(
+                angle + Math.PI / 6
+            )
         );
 
         ctx.closePath();
@@ -11745,3 +11790,4 @@ function drawGridMoves() {
         ctx.fill();
     });
 }
+1
