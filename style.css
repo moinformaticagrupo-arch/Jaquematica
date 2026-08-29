@@ -30,7 +30,7 @@
     --danger: #ff5c70;
     --warning: #f5b84b;
 
-    --board-light: #e9edf3;
+    --board-light: #0368ff;
     --board-dark: #64748b;
 
     --radius-small: 10px;
@@ -231,9 +231,6 @@ body {
 
     align-items: center;
     justify-content: center;
-
-    background: white;
-
     padding: 5px;
 
     box-shadow:
