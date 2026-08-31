@@ -3503,4 +3503,539 @@ body {
 
     }
 
+}\n\n/* =========================================================
+   FÓRMULAS MATEMÁTICAS
+========================================================= */
+
+.formulas-section-title {
+    position: relative;
+    align-items: center;
+    margin-bottom: 26px;
+}
+
+.formulas-title-symbol {
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(79, 140, 255, 0.45);
+    border-radius: 18px;
+    background: linear-gradient(145deg, rgba(79, 140, 255, 0.16), rgba(10, 23, 39, 0.55));
+    color: var(--text-main);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 40px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+
+.formulas-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Cada fórmula funciona como una tarjeta independiente. */
+.formula-card {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: linear-gradient(145deg, rgba(15, 29, 48, 0.9), rgba(8, 20, 35, 0.88));
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+    transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+.formula-card:hover {
+    border-color: rgba(79, 140, 255, 0.35);
+    transform: translateY(-1px);
+}
+
+.formula-card[open] {
+    border-color: rgba(79, 140, 255, 0.72);
+    background:
+        radial-gradient(circle at 50% 65%, rgba(79, 140, 255, 0.08), transparent 38%),
+        linear-gradient(145deg, rgba(13, 31, 52, 0.98), rgba(7, 19, 34, 0.98));
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.22), 0 0 28px rgba(79, 140, 255, 0.07);
+}
+
+.formula-card summary {
+    min-height: 82px;
+    display: grid;
+    grid-template-columns: 50px 48px minmax(220px, 1fr) 24px;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+}
+
+.formula-card summary::-webkit-details-marker {
+    display: none;
+}
+
+.formula-number {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(79, 140, 255, 0.26);
+    border-radius: 10px;
+    color: var(--accent-light);
+    background: rgba(79, 140, 255, 0.08);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.formula-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 50%;
+    color: var(--accent-light);
+    background: rgba(255, 255, 255, 0.025);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.parallel-icon {
+    color: var(--success);
+    font-size: 25px;
+}
+
+.perpendicular-icon {
+    color: #b58cff;
+    font-size: 24px;
+}
+
+.formula-name {
+    min-width: 0;
+    color: var(--text-main);
+    font-size: 15px;
+    font-weight: 650;
+}
+
+/* La fórmula no se muestra pequeña en la tarjeta cerrada: aparece grande al abrirla. */
+.formula-preview {
+    display: none;
+}
+
+.formula-chevron {
+    color: var(--text-secondary);
+    font-size: 25px;
+    line-height: 1;
+    text-align: center;
+    transform: rotate(0deg);
+    transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.formula-card[open] .formula-chevron {
+    transform: rotate(180deg);
+    color: var(--accent-light);
+}
+
+/* Área amplia y central para que la fórmula ocupe una parte importante de la pantalla. */
+.formula-content {
+    min-height: 390px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    padding: 34px 30px 42px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    animation: formulaOpen 0.25s ease;
+    position: relative;
+}
+
+.formula-content::before {
+    content: "";
+    position: absolute;
+    width: min(520px, 72%);
+    height: 220px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(ellipse, rgba(79, 140, 255, 0.11), transparent 68%);
+    pointer-events: none;
+}
+
+.formula-content > * {
+    position: relative;
+    z-index: 1;
+}
+
+.formula-content-label {
+    align-self: center;
+    padding: 0;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.math-display {
+    color: var(--text-main);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(58px, 6vw, 96px);
+    font-style: italic;
+    line-height: 1.25;
+    text-align: center;
+    text-shadow: 0 5px 26px rgba(79, 140, 255, 0.12);
+}
+
+.math-inline {
+    font-style: italic;
+}
+
+.fraction {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+}
+
+.fraction-box {
+    display: inline-flex;
+    flex-direction: column;
+    min-width: 150px;
+    align-items: stretch;
+    text-align: center;
+    font-style: italic;
+}
+
+.fraction-box span:first-child {
+    padding: 0 18px 8px;
+    border-bottom: 3px solid currentColor;
+}
+
+.fraction-box span:last-child {
+    padding: 8px 18px 0;
+}
+
+.formula-alternative {
+    margin-top: 0;
+    color: var(--text-secondary);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(22px, 2.2vw, 30px);
+    font-style: italic;
+}
+
+.long-formula {
+    flex-wrap: wrap;
+    font-size: clamp(42px, 4.5vw, 72px);
+}
+
+@keyframes formulaOpen {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 900px) {
+    .formula-card summary {
+        grid-template-columns: 44px 44px minmax(0, 1fr) 24px;
+    }
+
+    .formula-content {
+        min-height: 330px;
+    }
+
+    .math-display {
+        font-size: clamp(48px, 8vw, 72px);
+    }
+
+    .long-formula {
+        font-size: clamp(34px, 6vw, 58px);
+    }
+}
+
+@media (max-width: 550px) {
+    .formulas-section-title {
+        align-items: flex-start;
+    }
+
+    .formulas-title-symbol {
+        width: 54px;
+        height: 54px;
+        position: absolute;
+        top: 0;
+        right: 0;
+        font-size: 30px;
+    }
+
+    .formula-card summary {
+        min-height: 70px;
+        grid-template-columns: 38px 40px minmax(0, 1fr) 20px;
+        gap: 8px;
+        padding: 10px 12px;
+    }
+
+    .formula-number {
+        width: 36px;
+        height: 36px;
+        font-size: 11px;
+    }
+
+    .formula-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 15px;
+    }
+
+    .formula-name {
+        font-size: 12px;
+        line-height: 1.3;
+    }
+
+    .formula-content {
+        min-height: 270px;
+        padding: 28px 14px 34px;
+        gap: 18px;
+    }
+
+    .math-display {
+        font-size: clamp(38px, 12vw, 58px);
+    }
+
+    .fraction {
+        gap: 7px;
+    }
+
+    .fraction-box {
+        min-width: 105px;
+    }
+
+    .fraction-box span:first-child {
+        border-bottom-width: 2px;
+        padding: 0 9px 5px;
+    }
+
+    .fraction-box span:last-child {
+        padding: 5px 9px 0;
+    }
+
+    .long-formula {
+        font-size: clamp(28px, 8vw, 42px);
+    }
+}
+
+/* =========================================================
+   DISTANCIA ENTRE DOS PUNTOS - DIAGRAMA
+========================================================= */
+
+.distance-content {
+    padding-bottom: 34px;
+}
+
+.distance-main-formula {
+    margin-bottom: 26px;
+}
+
+.distance-diagram-wrap {
+    width: min(920px, 100%);
+    margin: 0 auto;
+    padding: 18px 18px 8px;
+    border: 1px solid rgba(79, 140, 255, 0.18);
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(4, 18, 34, 0.82), rgba(2, 11, 24, 0.94));
+    box-shadow: inset 0 0 35px rgba(79, 140, 255, 0.045);
+}
+
+.distance-diagram {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 310px;
+}
+
+.distance-axis-x,
+.distance-axis-y {
+    stroke: rgba(150, 170, 200, 0.38);
+    stroke-width: 2;
+    stroke-dasharray: 7 7;
+}
+
+.distance-hypotenuse {
+    stroke: #ff4b4b;
+    stroke-width: 7;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 7px rgba(255, 75, 75, 0.28));
+}
+
+.distance-point {
+    fill: #3d8bff;
+    stroke: #dceaff;
+    stroke-width: 3;
+    filter: drop-shadow(0 0 7px rgba(61, 139, 255, 0.55));
+}
+
+.distance-point-label,
+.distance-point-coord {
+    fill: #eef5ff;
+    font-family: Inter, Arial, sans-serif;
+    font-weight: 700;
+}
+
+.distance-point-label {
+    font-size: 28px;
+}
+
+.distance-point-coord {
+    fill: #76a9ff;
+    font-size: 24px;
+}
+
+.distance-label-x,
+.distance-label-y {
+    fill: #b977ff;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    font-size: 31px;
+    font-weight: 700;
+}
+
+.distance-label-d {
+    fill: #ff5555;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    font-size: 38px;
+    font-weight: 700;
+}
+
+.distance-right-angle {
+    fill: none;
+    stroke: #b977ff;
+    stroke-width: 4;
+}
+
+/* =========================================================
+   HISTORIAL - MOSTRAR SIEMPRE JUGADOR + IA
+========================================================= */
+
+.history-move.player-move {
+    color: var(--text-main);
+    border-left: 3px solid rgba(79, 140, 255, 0.75);
+}
+
+.history-move.ai-move {
+    color: var(--accent-light);
+    border-left: 3px solid rgba(94, 211, 145, 0.75);
+}
+
+.history-move.player-move:hover,
+.history-move.ai-move:hover {
+    background: rgba(255, 255, 255, 0.045);
+}
+
+.history-move.player-move::before {
+    content: 'J';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    border-radius: 50%;
+    background: rgba(79, 140, 255, 0.15);
+    color: #76a9ff;
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.history-move.ai-move::before {
+    content: 'IA';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 2px;
+    flex: 0 0 18px;
+    border-radius: 50%;
+    background: rgba(94, 211, 145, 0.12);
+    color: #72dfa0;
+    font-size: 7px;
+    font-weight: 800;
+}
+
+@media (max-width: 700px) {
+    .distance-diagram-wrap {
+        padding: 10px 6px 4px;
+        border-radius: 14px;
+    }
+
+    .distance-diagram {
+        min-height: 230px;
+    }
+
+    .distance-point-label {
+        font-size: 24px;
+    }
+
+    .distance-point-coord {
+        font-size: 20px;
+    }
+
+    .distance-label-x,
+    .distance-label-y {
+        font-size: 25px;
+    }
+
+    .distance-label-d {
+        font-size: 31px;
+    }
+}
+
+
+/* =========================================================
+   IA VS IA — AJUSTES VISUALES
+========================================================= */
+
+.ai-board-area .board-wrapper {
+    width: min(760px, 100%);
+    min-width: 0;
+}
+
+#aiChessBoard {
+    min-width: 280px;
+}
+
+.ai-history-move {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 8px;
+    margin-bottom: 4px;
+    border-radius: 8px;
+    background: rgba(255,255,255,.035);
+}
+
+.ai-history-player {
+    min-width: 31px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .4px;
+}
+
+.ai-white .ai-history-player { color: var(--accent-light); }
+.ai-black .ai-history-player { color: #35d39a; }
+
+@media (max-width: 900px) {
+    .ai-game-layout {
+        grid-template-columns: 1fr;
+    }
+    .ai-board-area .board-wrapper {
+        width: 100%;
+    }
 }
