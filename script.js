@@ -4764,6 +4764,9 @@ function addMoveToHistory(
         "history-move"
     );
 
+    /* Identificador explícito para garantir que as duas cores/jogadas
+       sejam renderizadas no histórico sem depender de outras rotinas. */
+    item.dataset.side = player === "player" ? "player" : "ai";
 
     if (
         player === "player"
@@ -8503,14 +8506,29 @@ function registerMoveStats(
 
 function addFormattedMoveToHistory(
     move,
-    color
+    color,
+    baseNotation = null
 ) {
 
-    const notation =
+    /*
+       La notación del jugador debe calcularse antes de ejecutar la jugada,
+       porque después del movimiento la casilla de origen queda vacía.
+       Para la IA se mantiene el comportamiento anterior.
+    */
+    let notation =
+        baseNotation ||
         createFinalMoveNotation(
             move,
             color
         );
+
+    /* El + o # se determina sobre la posición ya actualizada. */
+    if (baseNotation) {
+        notation = addCheckSymbol(
+            baseNotation,
+            color
+        );
+    }
 
 
     addMoveToHistory(
@@ -8637,7 +8655,8 @@ function updateMoveGrid(
 
 function registerCompletedMove(
     move,
-    color
+    color,
+    baseNotation = null
 ) {
 
     if (!move) {
@@ -8656,7 +8675,9 @@ function registerCompletedMove(
 
         move,
 
-        color
+        color,
+
+        baseNotation
 
     );
 
@@ -9202,6 +9223,19 @@ function performPlayerMove(
 
 
     /* =====================================================
+       NOTACIÓN DEL JUGADOR
+       Se obtiene ANTES de mover la pieza para conservar la pieza de origen.
+    ===================================================== */
+
+    const playerMoveNotation =
+        createMoveNotation(
+            legalMove.from,
+            legalMove.to,
+            movingPiece
+        );
+
+
+    /* =====================================================
        REALIZAR MOVIMIENTO
     ===================================================== */
 
@@ -9231,7 +9265,8 @@ function performPlayerMove(
 
     registerCompletedMove(
         legalMove,
-        "white"
+        "white",
+        playerMoveNotation
     );
 
 
@@ -9889,7 +9924,50 @@ function initializeHintButton() {
    INICIALIZAR TODOS LOS CONTROLES
 ========================================================= */
 
+
+
+/* =========================================================
+   NAVEGACIÓN PRINCIPAL
+========================================================= */
+
+function initializeMainNavigation() {
+
+    const navButtons = document.querySelectorAll('.nav-button[data-section]');
+    const sections = document.querySelectorAll('.page-section');
+
+    if (!navButtons.length || !sections.length) return;
+
+    navButtons.forEach(button => {
+
+        if (button.dataset.navigationInitialized === 'true') return;
+
+        button.dataset.navigationInitialized = 'true';
+
+        button.addEventListener('click', () => {
+
+            const targetId = button.dataset.section;
+            const target = document.getElementById(targetId);
+
+            if (!target) return;
+
+            navButtons.forEach(item => item.classList.remove('active'));
+            button.classList.add('active');
+
+            sections.forEach(section => section.classList.remove('active-section'));
+            target.classList.add('active-section');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        });
+
+    });
+
+}
+
+
 function initializeAllControls() {
+
+    initializeMainNavigation();
 
     initializeChessBoardClick();
 
@@ -9902,6 +9980,8 @@ function initializeAllControls() {
     initializeUndoButton();
 
     initializeHintButton();
+
+    initializeAIVsAIControls();
 
 }
 
@@ -11791,3 +11871,403 @@ function drawGridMoves() {
     });
 }
 1
+
+/* =========================================================
+   IA VS IA — TABLERO Y PARTIDA INDEPENDIENTE
+   Esta sección utiliza el mismo motor legal del juego principal,
+   pero mantiene su propia posición, turno, enroques e historial.
+========================================================= */
+
+let aiCastlingRights = {
+    whiteKing: true,
+    whiteRookKing: true,
+    whiteRookQueen: true,
+    blackKing: true,
+    blackRookKing: true,
+    blackRookQueen: true
+};
+
+let aiEnPassantTarget = null;
+let aiHistory = [];
+let aiGameMoveNumber = 1;
+let aiLastMove = null;
+let aiGameOver = false;
+let aiGameInitialized = false;
+
+function cloneCastlingRights(rights) {
+    return {
+        whiteKing: !!rights.whiteKing,
+        whiteRookKing: !!rights.whiteRookKing,
+        whiteRookQueen: !!rights.whiteRookQueen,
+        blackKing: !!rights.blackKing,
+        blackRookKing: !!rights.blackRookKing,
+        blackRookQueen: !!rights.blackRookQueen
+    };
+}
+
+function getAILegalMoves(color) {
+    const savedBoard = board;
+    const savedRights = castlingRights;
+    const savedEnPassant = enPassantTarget;
+
+    board = aiBoard;
+    castlingRights = aiCastlingRights;
+    enPassantTarget = aiEnPassantTarget;
+
+    let moves = [];
+    try {
+        moves = getAllLegalMoves(aiBoard, color) || [];
+    } finally {
+        aiBoard = board;
+        aiCastlingRights = castlingRights;
+        aiEnPassantTarget = enPassantTarget;
+        board = savedBoard;
+        castlingRights = savedRights;
+        enPassantTarget = savedEnPassant;
+    }
+
+    return moves;
+}
+
+function updateAICastlingRights(piece, from, to, capturedPiece) {
+    if (!piece) return;
+    const color = piece.color;
+
+    if (piece.type === 'king') {
+        aiCastlingRights[color === 'white' ? 'whiteKing' : 'blackKing'] = false;
+    }
+
+    if (piece.type === 'rook') {
+        if (color === 'white' && from.row === 7 && from.col === 7) aiCastlingRights.whiteRookKing = false;
+        if (color === 'white' && from.row === 7 && from.col === 0) aiCastlingRights.whiteRookQueen = false;
+        if (color === 'black' && from.row === 0 && from.col === 7) aiCastlingRights.blackRookKing = false;
+        if (color === 'black' && from.row === 0 && from.col === 0) aiCastlingRights.blackRookQueen = false;
+    }
+
+    if (capturedPiece && capturedPiece.type === 'rook') {
+        if (capturedPiece.color === 'white' && to.row === 7 && to.col === 7) aiCastlingRights.whiteRookKing = false;
+        if (capturedPiece.color === 'white' && to.row === 7 && to.col === 0) aiCastlingRights.whiteRookQueen = false;
+        if (capturedPiece.color === 'black' && to.row === 0 && to.col === 7) aiCastlingRights.blackRookKing = false;
+        if (capturedPiece.color === 'black' && to.row === 0 && to.col === 0) aiCastlingRights.blackRookQueen = false;
+    }
+}
+
+function applyAIMove(move) {
+    const from = move.from;
+    const to = move.to;
+    const piece = aiBoard[from.row][from.col];
+    if (!piece) return null;
+
+    let capturedPiece = aiBoard[to.row][to.col];
+    const pieceBefore = { type: piece.type, color: piece.color };
+
+    updateAICastlingRights(piece, from, to, capturedPiece);
+
+    aiBoard[to.row][to.col] = piece;
+    aiBoard[from.row][from.col] = null;
+
+    if (move.enPassant) {
+        capturedPiece = aiBoard[from.row][to.col];
+        aiBoard[from.row][to.col] = null;
+    }
+
+    if (move.castle === 'king') {
+        const row = from.row;
+        aiBoard[row][5] = aiBoard[row][7];
+        aiBoard[row][7] = null;
+    }
+
+    if (move.castle === 'queen') {
+        const row = from.row;
+        aiBoard[row][3] = aiBoard[row][0];
+        aiBoard[row][0] = null;
+    }
+
+    if (piece.type === 'pawn' && (to.row === 0 || to.row === 7)) {
+        piece.type = 'queen';
+    }
+
+    aiEnPassantTarget = null;
+    if (pieceBefore.type === 'pawn' && Math.abs(to.row - from.row) === 2) {
+        aiEnPassantTarget = {
+            row: (from.row + to.row) / 2,
+            col: from.col
+        };
+    }
+
+    return { pieceBefore, capturedPiece };
+}
+
+function chooseAIVsAIMove(moves) {
+    if (!moves.length) return null;
+
+    const level = Number(document.getElementById('aiLevelSelect')?.value || 2);
+
+    if (level === 1) {
+        return moves[Math.floor(Math.random() * moves.length)];
+    }
+
+    const captures = moves.filter(move => {
+        if (move.enPassant) return true;
+        return !!aiBoard[move.to.row][move.to.col];
+    });
+
+    if (level === 2) {
+        if (captures.length && Math.random() > 0.35) {
+            return captures[Math.floor(Math.random() * captures.length)];
+        }
+        return moves[Math.floor(Math.random() * moves.length)];
+    }
+
+    const scored = moves.map(move => {
+        let score = Math.random() * (level === 4 ? 0.2 : 2);
+        const target = move.enPassant
+            ? aiBoard[move.from.row][move.to.col]
+            : aiBoard[move.to.row][move.to.col];
+        if (target) score += (PIECE_VALUES[target.type] || 0) * 10;
+
+        const piece = aiBoard[move.from.row][move.from.col];
+        if (piece?.type === 'pawn' && (move.to.row === 0 || move.to.row === 7)) score += 90;
+        if (move.castle) score += 4;
+        return { move, score };
+    });
+
+    scored.sort((a, b) => b.score - a.score);
+    const poolSize = level === 4 ? Math.min(2, scored.length) : Math.min(5, scored.length);
+    return scored[Math.floor(Math.random() * poolSize)].move;
+}
+
+function getAIMoveDelay() {
+    const value = Number(document.getElementById('aiSpeedSelect')?.value || 1000);
+    return Math.max(150, value);
+}
+
+function getAIMoveNotation(move, pieceBefore, capturedPiece) {
+    if (move.castle === 'king') return 'O-O';
+    if (move.castle === 'queen') return 'O-O-O';
+
+    const files = ['a','b','c','d','e','f','g','h'];
+    const to = files[move.to.col] + (8 - move.to.row);
+    const symbols = { king:'R', queen:'D', rook:'T', bishop:'A', knight:'C', pawn:'' };
+    const prefix = symbols[pieceBefore.type] || '';
+    const capture = !!capturedPiece || !!move.enPassant;
+    const pawnFile = pieceBefore.type === 'pawn' && capture ? files[move.from.col] : '';
+    let text = prefix + pawnFile + (capture ? 'x' : '') + to;
+    if (pieceBefore.type === 'pawn' && (move.to.row === 0 || move.to.row === 7)) text += '=D';
+    return text;
+}
+
+function renderAIVsAIBoard() {
+    const el = document.getElementById('aiChessBoard');
+    if (!el) return;
+    el.innerHTML = '';
+
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            const square = document.createElement('div');
+            square.className = `chess-square ${(row + col) % 2 === 0 ? 'light-square' : 'dark-square'}`;
+            square.dataset.row = row;
+            square.dataset.col = col;
+
+            const piece = aiBoard[row][col];
+            if (piece) {
+                const pieceElement = document.createElement('span');
+                pieceElement.className = `chess-piece ${piece.color}`;
+                pieceElement.textContent = PIECES[piece.color][piece.type];
+                square.appendChild(pieceElement);
+            }
+            el.appendChild(square);
+        }
+    }
+
+    requestAnimationFrame(() => {
+        const canvas = document.getElementById('aiMoveCanvas');
+        if (!canvas || !el) return;
+        const rect = el.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        canvas.style.width = `${rect.width}px`;
+        canvas.style.height = `${rect.height}px`;
+        const ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, rect.width, rect.height);
+        if (!aiLastMove) return;
+        const size = rect.width / 8;
+        ctx.strokeStyle = 'rgba(79,140,255,.95)';
+        ctx.lineWidth = Math.max(2, size * .045);
+        ctx.strokeRect(aiLastMove.from.col * size + 2, aiLastMove.from.row * size + 2, size - 4, size - 4);
+        ctx.strokeStyle = 'rgba(53,211,154,.95)';
+        ctx.strokeRect(aiLastMove.to.col * size + 2, aiLastMove.to.row * size + 2, size - 4, size - 4);
+    });
+}
+
+function renderAIMoveHistory() {
+    const el = document.getElementById('aiMoveHistory');
+    if (!el) return;
+    if (!aiHistory.length) {
+        el.innerHTML = '<div class="history-empty"><span>🤖</span><p>La partida todavía no comenzó.</p></div>';
+        return;
+    }
+    el.innerHTML = '';
+    aiHistory.forEach(item => {
+        const row = document.createElement('div');
+        row.className = `history-move ai-history-move ai-${item.color}`;
+        row.innerHTML = `<span class="ai-history-player">${item.color === 'white' ? 'IA1' : 'IA2'}</span><span>${item.number}${item.color === 'black' ? '...' : '.'} ${item.text}</span>`;
+        el.appendChild(row);
+    });
+    el.scrollTop = el.scrollHeight;
+}
+
+function updateAIGameMessage(text) {
+    const el = document.getElementById('aiGameMessageText');
+    if (el) el.textContent = text;
+}
+
+function aiGameStep() {
+    aiMoveTimer = null;
+    if (!aiPlaying || aiGameOver) return;
+
+    const color = aiTurn;
+    const moves = getAILegalMoves(color);
+
+    if (!moves.length) {
+        aiGameOver = true;
+        aiPlaying = false;
+        const check = isKingInCheck(aiBoard, color);
+        updateAIGameMessage(check ? `${color === 'white' ? 'IA1' : 'IA2'} recibió jaque mate.` : 'Tablas por ahogado.');
+        return;
+    }
+
+    const move = chooseAIVsAIMove(moves);
+    if (!move) return;
+
+    const movingPiece = aiBoard[move.from.row][move.from.col];
+    const before = { type: movingPiece.type, color: movingPiece.color };
+    const captured = move.enPassant
+        ? aiBoard[move.from.row][move.to.col]
+        : aiBoard[move.to.row][move.to.col];
+
+    const notation = getAIMoveNotation(move, before, captured);
+    applyAIMove(move);
+    aiLastMove = { from: {...move.from}, to: {...move.to} };
+
+    aiHistory.push({
+        number: aiGameMoveNumber,
+        color,
+        text: notation
+    });
+    if (color === 'black') aiGameMoveNumber++;
+
+    renderAIVsAIBoard();
+    renderAIMoveHistory();
+
+    const opponent = color === 'white' ? 'black' : 'white';
+    const opponentStatus = isKingInCheck(aiBoard, opponent)
+        ? (getAILegalMoves(opponent).length ? 'check' : 'checkmate')
+        : (getAILegalMoves(opponent).length ? '' : 'stalemate');
+
+    if (opponentStatus === 'checkmate') {
+        aiGameOver = true;
+        aiPlaying = false;
+        updateAIGameMessage(`${color === 'white' ? 'IA1' : 'IA2'} ganó por jaque mate.`);
+        return;
+    }
+    if (opponentStatus === 'stalemate') {
+        aiGameOver = true;
+        aiPlaying = false;
+        updateAIGameMessage('Partida terminada en tablas.');
+        return;
+    }
+
+    aiTurn = opponent;
+    updateAIGameMessage(`${aiTurn === 'white' ? 'IA1' : 'IA2'} está pensando...`);
+    aiMoveTimer = setTimeout(aiGameStep, getAIMoveDelay());
+}
+
+function resetAIVsAI() {
+    if (aiMoveTimer) clearTimeout(aiMoveTimer);
+    aiMoveTimer = null;
+    aiBoard = createInitialBoard();
+    aiTurn = 'white';
+    aiPlaying = false;
+    aiPaused = false;
+    aiMoveCount = 0;
+    aiCastlingRights = cloneCastlingRights({
+        whiteKing: true, whiteRookKing: true, whiteRookQueen: true,
+        blackKing: true, blackRookKing: true, blackRookQueen: true
+    });
+    aiEnPassantTarget = null;
+    aiHistory = [];
+    aiGameMoveNumber = 1;
+    aiLastMove = null;
+    aiGameOver = false;
+    renderAIVsAIBoard();
+    renderAIMoveHistory();
+    updateAIGameMessage('Presioná iniciar para comenzar.');
+}
+
+function startAIVsAIGame() {
+    if (aiMoveTimer) clearTimeout(aiMoveTimer);
+    aiBoard = createInitialBoard();
+    aiTurn = 'white';
+    aiPlaying = true;
+    aiPaused = false;
+    aiMoveCount = 0;
+    aiCastlingRights = cloneCastlingRights({
+        whiteKing: true, whiteRookKing: true, whiteRookQueen: true,
+        blackKing: true, blackRookKing: true, blackRookQueen: true
+    });
+    aiEnPassantTarget = null;
+    aiHistory = [];
+    aiGameMoveNumber = 1;
+    aiLastMove = null;
+    aiGameOver = false;
+    renderAIVsAIBoard();
+    renderAIMoveHistory();
+    updateAIGameMessage('IA1 está pensando...');
+    aiMoveTimer = setTimeout(aiGameStep, 250);
+}
+
+function initializeAIVsAIControls() {
+    const button = document.getElementById('startAIGameButton');
+    const speed = document.getElementById('aiSpeedSelect');
+    const level = document.getElementById('aiLevelSelect');
+    const boardEl = document.getElementById('aiChessBoard');
+    if (!button || !boardEl) return;
+    if (button.dataset.aiInitialized === 'true') {
+        renderAIVsAIBoard();
+        return;
+    }
+    button.dataset.aiInitialized = 'true';
+    button.addEventListener('click', () => {
+        if (aiPlaying) {
+            aiPlaying = false;
+            if (aiMoveTimer) clearTimeout(aiMoveTimer);
+            aiMoveTimer = null;
+            button.innerHTML = '▶ Reanudar partida';
+            updateAIGameMessage('Partida pausada.');
+            return;
+        }
+        if (aiHistory.length && !aiGameOver) {
+            aiPlaying = true;
+            button.innerHTML = '⏸ Pausar partida';
+            updateAIGameMessage(`${aiTurn === 'white' ? 'IA1' : 'IA2'} está pensando...`);
+            aiMoveTimer = setTimeout(aiGameStep, 120);
+            return;
+        }
+        startAIVsAIGame();
+        button.innerHTML = '⏸ Pausar partida';
+    });
+    if (speed) speed.addEventListener('change', () => {
+        if (aiPlaying && aiMoveTimer) {
+            clearTimeout(aiMoveTimer);
+            aiMoveTimer = setTimeout(aiGameStep, getAIMoveDelay());
+        }
+    });
+    if (level) level.addEventListener('change', () => {
+        /* El nivel se lee en cada jugada; no hace falta reiniciar la partida. */
+    });
+    resetAIVsAI();
+}
