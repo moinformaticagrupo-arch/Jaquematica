@@ -643,260 +643,42 @@
         <section id="ai-section" class="page-section">
 
 
-            <div class="section-title">
-
-                <div>
-
-                    <span class="section-label">
-                        OBSERVACIÓN
-                    </span>
-
-                    <h2>
-                        Observá a la IA jugar
-                    </h2>
-
-                    <p>
-                        Analizá cómo piensa y toma decisiones.
-                    </p>
-
-                </div>
-
-
-                <button id="startAIGameButton" class="primary-button" type="button">
-
-                    ▶
-
-                    Iniciar partida
-
-                </button>
-
+            <div class="ai-section-heading">
+                <div><span class="section-label">OBSERVACIÓN</span><h2>Observá a la IA jugar</h2><p>Analizá cómo piensa y toma decisiones.</p></div>
+                <span class="ai-section-badge"><i></i> Simulación en vivo</span>
             </div>
-
 
             <div class="ai-game-layout">
-
-
-                <!-- =================================================
-             TABLERO IA VS IA
-        ================================================= -->
-
-                <div class="board-area ai-board-area">
-
-
-                    <div class="player-bar">
-
-                        <div class="player-info">
-
-                            <div class="player-avatar ai-avatar">
-                                🤖
-                            </div>
-
-                            <div>
-
-                                <strong>
-                                    IA1
-                                </strong>
-
-                                <span>
-                                    Inteligencia Artificial
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="board-wrapper">
-
-                        <canvas id="aiMoveCanvas" class="move-canvas"></canvas>
-
-
-                        <div id="aiChessBoard" class="chess-board" aria-label="Tablero de IA">
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="player-bar player-bottom">
-
-                        <div class="player-info">
-
-                            <div class="player-avatar ai-avatar">
-                                🤖
-                            </div>
-
-                            <div>
-
-                                <strong>
-                                    IA2
-                                </strong>
-
-                                <span>
-                                    Inteligencia Artificial
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div id="aiGameMessage" class="game-message">
-
-                        <div class="message-icon">
-                            🤖
-                        </div>
-
-                        <span id="aiGameMessageText">
-                            Presioná iniciar para comenzar.
-                        </span>
-
-                    </div>
-
-
-                </div>
-
-
-                <!-- =================================================
-             PANEL IA
-        ================================================= -->
-
-                <aside class="game-sidebar">
-
-
-                    <div class="panel-card">
-
-                        <div class="panel-header">
-
-                            <div>
-
-                                <span class="panel-label">
-                                    IA VS IA
-                                </span>
-
-                                <h3>
-                                    Configuración
-                                </h3>
-
-                            </div>
-
-                            <div class="panel-icon">
-                                🤖
-                            </div>
-
-                        </div>
-
-
-                        <div class="setting-row">
-
-                            <span>
-                                Velocidad
-                            </span>
-
-                            <select id="aiSpeedSelect" class="time-select">
-
-                                <option value="500">
-                                    Rápida
-                                </option>
-
-                                <option value="1000" selected>
-                                    Normal
-                                </option>
-
-                                <option value="2000">
-                                    Lenta
-                                </option>
-
-                            </select>
-
-                        </div>
-
-
-                        <div class="setting-row">
-
-                            <span>
-                                Nivel
-                            </span>
-
-                            <select id="aiLevelSelect" class="time-select">
-
-                                <option value="1">
-                                    Fácil
-                                </option>
-
-                                <option value="2" selected>
-                                    Medio
-                                </option>
-
-                                <option value="3">
-                                    Difícil
-                                </option>
-
-                                <option value="4">
-                                    Experto
-                                </option>
-
-                            </select>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- =================================================
-                 MOVIMIENTOS IA
-            ================================================= -->
-
-                    <div class="panel-card">
-
-                        <div class="panel-header">
-
-                            <div>
-
-                                <span class="panel-label">
-                                    HISTORIAL
-                                </span>
-
-                                <h3>
-                                    Movimientos IA vs IA
-                                </h3>
-
-                            </div>
-
-                            <div class="panel-icon">
-                                📋
-                            </div>
-
-                        </div>
-
-
-                        <div id="aiMoveHistory" class="move-history">
-
-                            <div class="history-empty">
-
-                                <span>
-                                    🤖
-                                </span>
-
-                                <p>
-                                    La partida todavía no comenzó.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
+                <aside class="ai-player-rail" aria-label="Perfiles de las inteligencias artificiales">
+                    <article class="ai-profile-card ai-profile-nebula">
+                        <div class="ai-profile-avatar">◉</div><strong>IA Nébula</strong><span class="ai-profile-kind">Inteligencia artificial</span>
+                        <span class="ai-thinking" id="aiWhiteStatus">Lista para jugar</span>
+                        <div class="ai-profile-stat"><span>Jugadas</span><b id="aiWhiteMoves">0</b></div>
+                    </article>
+                    <article class="ai-profile-card ai-profile-aurora">
+                        <div class="ai-profile-avatar">♙</div><strong>IA Aurora</strong><span class="ai-profile-kind">Inteligencia artificial</span>
+                        <span class="ai-thinking" id="aiBlackStatus">Lista para jugar</span>
+                        <div class="ai-profile-stat"><span>Jugadas</span><b id="aiBlackMoves">0</b></div>
+                    </article>
                 </aside>
 
-            </div>
+                <div class="ai-stage">
+                    <div class="ai-stage-top"><div class="ai-stage-player"><span class="ai-mini-avatar">◉</span><div><strong>IA Nébula</strong><small>Juega con blancas</small></div></div><button id="startAIGameButton" class="primary-button" type="button">▶ Iniciar partida</button></div>
+                    <div class="board-wrapper ai-live-board-wrapper"><canvas id="aiMoveCanvas" class="move-canvas"></canvas><div id="aiChessBoard" class="chess-board" aria-label="Tablero de IA contra IA"></div></div>
+                    <div class="ai-stage-bottom"><div class="ai-stage-player"><span class="ai-mini-avatar aurora">♙</span><div><strong>IA Aurora</strong><small>Juega con negras</small></div></div><span id="aiTurnPill" class="ai-turn-pill">En espera</span></div>
+                    <div id="aiGameMessage" class="game-message"><div class="message-icon">🤖</div><span id="aiGameMessageText">Presioná iniciar para comenzar.</span></div>
+                </div>
 
+                <aside class="ai-sidebar">
+                    <div class="panel-card ai-control-card"><div class="panel-header"><div><span class="panel-label">PANEL DE CONTROL</span><h3>Configuración de IA</h3></div><div class="panel-icon">⚙</div></div>
+                        <label class="ai-setting-label" for="aiSpeedSelect">Velocidad</label><select id="aiSpeedSelect" class="time-select"><option value="2000">Lento</option><option value="1000" selected>Normal</option><option value="500">Rápido</option></select>
+                        <label class="ai-setting-label" for="aiLevelSelect">Nivel</label><select id="aiLevelSelect" class="time-select"><option value="1">Fácil</option><option value="2" selected>Medio</option><option value="3">Difícil</option><option value="4">Experto</option></select>
+                    </div>
+                    <div class="panel-card ai-history-card"><div class="panel-header"><div><span class="panel-label">PARTIDA EN CURSO</span><h3>Historial de movimientos</h3></div><div class="panel-icon">📋</div></div><div id="aiMoveHistory" class="move-history"><div class="history-empty"><span>🤖</span><p>La partida todavía no comenzó.</p></div></div></div>
+                </aside>
+
+                <section class="ai-learning-panel"><div class="ai-grid-card"><div class="ai-lower-heading"><span class="panel-label">VISUALIZACIÓN</span><h3>Cuadrícula y notación</h3></div><canvas id="aiGridBoard" class="ai-grid-board" aria-label="Coordenadas y movimientos de la partida entre inteligencias artificiales"></canvas><div class="ai-grid-caption"><span id="aiGridMoveCount">0 jugadas representadas</span><span>a–h · 1–8</span></div></div><div class="ai-learning-copy"><span class="panel-label">APRENDIZAJE INTEGRADO</span><h3>Matemática y Ajedrez</h3><p>Cada movimiento es una coordenada: las columnas usan letras (a–h) y las filas números (1–8). Seguí el recorrido de las piezas en la cuadrícula.</p></div></section>
+            </div>
 
         </section>
 
@@ -908,166 +690,73 @@
         <section id="statistics-section" class="page-section">
 
 
-            <div class="section-title">
-
+            <div class="stats-heading">
                 <div>
-
-                    <span class="section-label">
-                        PROGRESO
-                    </span>
-
-                    <h2>
-                        Estadísticas
-                    </h2>
-
-                    <p>
-                        Consultá tu rendimiento en las partidas.
-                    </p>
-
+                    <span class="section-label">TU PROGRESO</span>
+                    <h2>Estadísticas y análisis</h2>
+                    <p>Una mirada clara a tu rendimiento en el tablero.</p>
                 </div>
-
+                <span class="stats-live"><i></i> Datos de esta sesión</span>
             </div>
 
-
-            <div class="statistics-grid">
-
-
-                <div class="stat-card">
-
-                    <div class="stat-icon">
-                        ♟
-                    </div>
-
-                    <div class="stat-content">
-
-                        <span>
-                            Partidas jugadas
-                        </span>
-
-                        <strong id="totalGames">
-                            0
-                        </strong>
-
-                    </div>
-
+            <div class="stats-dashboard">
+                <div class="stats-metrics">
+                    <article class="metric-card metric-teal">
+                        <div class="metric-top"><span class="metric-icon">♟</span><span class="metric-spark">♜</span></div>
+                        <span class="metric-label">Partidas jugadas</span>
+                        <strong id="totalGames">0</strong>
+                        <small>Partidas completadas</small>
+                    </article>
+                    <article class="metric-card metric-blue">
+                        <div class="metric-top"><span class="metric-icon">🏆</span><span class="metric-spark">↗</span></div>
+                        <span class="metric-label">Partidas ganadas</span>
+                        <strong id="totalWins">0</strong>
+                        <small>Victorias registradas</small>
+                    </article>
+                    <article class="metric-card metric-green">
+                        <div class="metric-top"><span class="metric-icon">∑</span><span class="metric-spark">▥</span></div>
+                        <span class="metric-label">Precisión de jugadas</span>
+                        <strong id="statsAccuracy">—<em>%</em></strong>
+                        <small>Buenas jugadas / total</small>
+                    </article>
+                    <article class="metric-card metric-gold">
+                        <div class="metric-top"><span class="metric-icon">★</span><span class="metric-spark">♛</span></div>
+                        <span class="metric-label">Puntos acumulados</span>
+                        <strong id="statsPoints">0</strong>
+                        <small>En esta sesión</small>
+                    </article>
                 </div>
 
-
-                <div class="stat-card">
-
-                    <div class="stat-icon">
-                        🏆
-                    </div>
-
-                    <div class="stat-content">
-
-                        <span>
-                            Victorias
-                        </span>
-
-                        <strong id="totalWins">
-                            0
-                        </strong>
-
-                    </div>
-
-                </div>
-
-
-                <div class="stat-card">
-
-                    <div class="stat-icon">
-                        📈
-                    </div>
-
-                    <div class="stat-content">
-
-                        <span>
-                            Porcentaje de victoria
-                        </span>
-
-                        <strong id="winPercentage">
-                            0%
-                        </strong>
-
-                    </div>
-
-                </div>
-
-
-                <div class="stat-card">
-
-                    <div class="stat-icon">
-                        ⭐
-                    </div>
-
-                    <div class="stat-content">
-
-                        <span>
-                            Mejor puntuación
-                        </span>
-
-                        <strong id="bestScore">
-                            0
-                        </strong>
-
-                    </div>
-
-                </div>
-
-
-            </div>
-
-
-            <!-- =================================================
-         ESTADÍSTICAS DETALLADAS
-    ================================================= -->
-
-            <div class="statistics-layout">
-
-
-                <div class="panel-card">
-
-                    <div class="panel-header">
-
-                        <div>
-
-                            <span class="panel-label">
-                                RESULTADOS
-                            </span>
-
-                            <h3>
-                                Historial de partidas
-                            </h3>
-
+                <div class="stats-main-grid">
+                    <article class="stats-panel stats-chart-panel">
+                        <div class="stats-panel-heading"><div><span class="panel-label">TENDENCIA</span><h3>Actividad de juego</h3></div><span class="chart-legend"><i></i> Movimientos</span></div>
+                        <div class="activity-chart" role="img" aria-label="Gráfico de actividad de juego de la sesión">
+                            <div class="chart-y-labels"><span>40</span><span>30</span><span>20</span><span>10</span><span>0</span></div>
+                            <div class="chart-plot"><div class="chart-gridlines"><i></i><i></i><i></i><i></i><i></i></div><svg viewBox="0 0 600 210" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="activityFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#4cb8ff" stop-opacity=".35"/><stop offset="1" stop-color="#4cb8ff" stop-opacity="0"/></linearGradient></defs><path d="M0 188 C55 180 72 145 125 152 S205 126 250 136 S325 90 375 103 S455 68 500 78 S560 45 600 34 L600 210 L0 210Z" fill="url(#activityFill)"/><path d="M0 188 C55 180 72 145 125 152 S205 126 250 136 S325 90 375 103 S455 68 500 78 S560 45 600 34" fill="none" stroke="#54bdff" stroke-width="3" vector-effect="non-scaling-stroke"/></svg><div class="chart-x-labels"><span>Inicio</span><span>10</span><span>20</span><span>30</span><span>40 movimientos</span></div></div>
                         </div>
+                        <p class="chart-note">La curva es ilustrativa; tus datos se actualizan al jugar.</p>
+                    </article>
 
-                        <div class="panel-icon">
-                            📊
-                        </div>
+                    <article class="stats-panel stats-recent-panel">
+                        <div class="stats-panel-heading"><div><span class="panel-label">REGISTRO</span><h3>Últimas partidas</h3></div><span class="panel-icon">↗</span></div>
+                        <div id="statisticsHistory" class="statistics-history stats-history-table"><div class="history-empty"><span>♟</span><p>Terminá una partida para ver tu historial.</p></div></div>
+                    </article>
 
-                    </div>
+                    <article class="stats-panel stats-board-panel">
+                        <div class="stats-panel-heading"><div><span class="panel-label">VISUALIZACIÓN</span><h3>Mapa de actividad</h3></div></div>
+                        <div id="statsHeatBoard" class="heat-board" aria-label="Mapa de actividad en vivo sobre el tablero actual" role="img"></div>
+                        <div class="heat-legend"><i></i> Casillas más visitadas <span id="statsHeatMoves">0 jugadas</span></div>
+                        <p class="chart-note">Se actualiza con cada movimiento de la partida.</p>
+                    </article>
 
-
-                    <div id="statisticsHistory" class="statistics-history">
-
-                        <div class="history-empty">
-
-                            <span>
-                                📊
-                            </span>
-
-                            <p>
-                                Todavía no hay partidas registradas.
-                            </p>
-
-                        </div>
-
-                    </div>
-
+                    <article class="stats-panel stats-insight-panel">
+                        <span class="panel-label">APRENDIZAJE</span><h3>Tu siguiente paso</h3>
+                        <p>Revisá el historial después de cada partida para reconocer patrones y fortalecer tu estrategia.</p>
+                        <button type="button" class="stats-play-link" data-section="game-section">♟&nbsp; Volver al tablero <span>→</span></button>
+                    </article>
                 </div>
 
-
+                <div class="stats-footer"><span>♟ JaqueMática</span><span>El progreso se construye jugada a jugada.</span></div>
             </div>
 
 
@@ -1629,3 +1318,4 @@
 </body>
 
 </html>
+
