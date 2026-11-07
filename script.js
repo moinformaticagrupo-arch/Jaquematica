@@ -379,6 +379,8 @@ function renderBoard() {
 
         drawGridMoves();
 
+        renderStatsHeatmap();
+
     });
 
 }
@@ -431,6 +433,8 @@ function addMoveArrow(from, to) {
         toCol: to.col
 
     });
+
+    renderStatsHeatmap();
 
 
     drawAllMoveArrows();
@@ -9933,6 +9937,7 @@ function initializeHintButton() {
 function initializeMainNavigation() {
 
     const navButtons = document.querySelectorAll('.nav-button[data-section]');
+    const statsLinks = document.querySelectorAll('.stats-play-link[data-section]');
     const sections = document.querySelectorAll('.page-section');
 
     if (!navButtons.length || !sections.length) return;
@@ -9956,12 +9961,82 @@ function initializeMainNavigation() {
             sections.forEach(section => section.classList.remove('active-section'));
             target.classList.add('active-section');
 
+            if (target.id === 'ai-section') {
+                requestAnimationFrame(() => {
+                    renderAIVsAIBoard();
+                    drawAIGrid();
+                });
+            }
+
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
         });
 
     });
 
+    statsLinks.forEach(button => {
+        if (button.dataset.navigationInitialized === 'true') return;
+        button.dataset.navigationInitialized = 'true';
+        button.addEventListener('click', () => {
+            const target = document.getElementById(button.dataset.section);
+            if (!target) return;
+            navButtons.forEach(item => {
+                item.classList.toggle('active', item.dataset.section === button.dataset.section);
+            });
+            sections.forEach(section => section.classList.toggle('active-section', section === target));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+
+}
+
+function renderStatsHeatmap() {
+    const heatBoard = document.getElementById("statsHeatBoard");
+    if (!heatBoard || !Array.isArray(board) || board.length !== 8) return;
+
+    const visits = Array.from({ length: 8 }, () => Array(8).fill(0));
+    let moveCount = 0;
+    if (Array.isArray(gridMoves)) {
+        gridMoves.forEach(move => {
+            // addMoveArrow guarda una entrada por jugada; updateMoveGrid
+            // agrega otra forma de datos para el lienzo matemático.
+            if (!Number.isInteger(move.fromRow) || !Number.isInteger(move.fromCol) ||
+                !Number.isInteger(move.toRow) || !Number.isInteger(move.toCol)) return;
+            visits[move.fromRow][move.fromCol]++;
+            visits[move.toRow][move.toCol]++;
+            moveCount++;
+        });
+    }
+
+    const hottest = Math.max(1, ...visits.flat());
+    const recent = lastThreeMoves?.[lastThreeMoves.length - 1];
+    heatBoard.replaceChildren();
+
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            const square = document.createElement("div");
+            const visitsHere = visits[row][col];
+            const heatLevel = visitsHere === 0 ? 0 : Math.min(4, Math.ceil((visitsHere / hottest) * 4));
+            square.className = `heat-square ${(row + col) % 2 === 0 ? "heat-light" : "heat-dark"}${heatLevel ? ` heat-level-${heatLevel}` : ""}`;
+            const file = String.fromCharCode(97 + col);
+            square.title = `${file}${8 - row} · ${visitsHere} visitas`;
+            const piece = board[row][col];
+            if (piece && PIECES[piece.color]?.[piece.type]) {
+                const glyph = document.createElement("span");
+                glyph.className = `heat-piece ${piece.color}`;
+                glyph.textContent = PIECES[piece.color][piece.type];
+                square.appendChild(glyph);
+            }
+            if (recent && ((recent.fromRow === row && recent.fromCol === col) ||
+                (recent.toRow === row && recent.toCol === col))) {
+                square.classList.add("heat-recent");
+            }
+            heatBoard.appendChild(square);
+        }
+    }
+
+    const moveLabel = document.getElementById("statsHeatMoves");
+    if (moveLabel) moveLabel.textContent = `${moveCount} ${moveCount === 1 ? "jugada" : "jugadas"}`;
 }
 
 
@@ -10349,6 +10424,17 @@ function updateStatisticsDisplay() {
         elements.totalWins.textContent =
             totalWins;
 
+    }
+
+    const accuracy = safeGetElement("statsAccuracy");
+    const points = safeGetElement("statsPoints");
+    if (accuracy) {
+        accuracy.innerHTML = totalMoves > 0
+            ? `${Math.round((goodMoves / totalMoves) * 100)}<em>%</em>`
+            : `—<em>%</em>`;
+    }
+    if (points) {
+        points.textContent = playerScore;
     }
 
 
@@ -12081,6 +12167,7 @@ function renderAIVsAIBoard() {
     }
 
     requestAnimationFrame(() => {
+        drawAIGrid();
         const canvas = document.getElementById('aiMoveCanvas');
         if (!canvas || !el) return;
         const rect = el.getBoundingClientRect();
@@ -12103,6 +12190,74 @@ function renderAIVsAIBoard() {
     });
 }
 
+function drawAIGrid() {
+    const canvas = document.getElementById('aiGridBoard');
+    const countLabel = document.getElementById('aiGridMoveCount');
+    if (!canvas) return;
+    const width = canvas.clientWidth || canvas.parentElement?.clientWidth || 0;
+    if (!width) return;
+    const height = Math.max(170, Math.min(250, Math.round(width * 0.38)));
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    canvas.style.height = `${height}px`;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+
+    const padLeft = 28;
+    const padTop = 8;
+    const boardSize = Math.min(width - padLeft - 8, height - 27);
+    const cell = boardSize / 8;
+    ctx.fillStyle = '#091526';
+    ctx.fillRect(padLeft, padTop, boardSize, boardSize);
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            ctx.fillStyle = (row + col) % 2 === 0 ? '#17283d' : '#0d1d31';
+            ctx.fillRect(padLeft + col * cell, padTop + row * cell, cell, cell);
+        }
+    }
+    ctx.strokeStyle = 'rgba(139,171,205,.32)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 8; i++) {
+        ctx.beginPath();
+        ctx.moveTo(padLeft + i * cell, padTop);
+        ctx.lineTo(padLeft + i * cell, padTop + boardSize);
+        ctx.moveTo(padLeft, padTop + i * cell);
+        ctx.lineTo(padLeft + boardSize, padTop + i * cell);
+        ctx.stroke();
+    }
+    ctx.font = '10px Inter, Arial, sans-serif';
+    ctx.fillStyle = '#a9bdd0';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const files = ['a','b','c','d','e','f','g','h'];
+    files.forEach((file, col) => ctx.fillText(file, padLeft + (col + .5) * cell, padTop + boardSize + 13));
+    ctx.textAlign = 'right';
+    for (let row = 0; row < 8; row++) ctx.fillText(String(8 - row), padLeft - 8, padTop + (row + .5) * cell);
+
+    const moves = aiHistory.filter(item => item.from && item.to).slice(-18);
+    moves.forEach((item, index) => {
+        const opacity = .2 + (index / Math.max(1, moves.length)) * .45;
+        const sx = padLeft + (item.from.col + .5) * cell;
+        const sy = padTop + (item.from.row + .5) * cell;
+        const ex = padLeft + (item.to.col + .5) * cell;
+        const ey = padTop + (item.to.row + .5) * cell;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(ex, ey);
+        ctx.strokeStyle = item.color === 'white' ? `rgba(114,174,255,${opacity})` : `rgba(86,222,180,${opacity})`;
+        ctx.lineWidth = Math.max(1, cell * .035);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(ex, ey, Math.max(2, cell * .09), 0, Math.PI * 2);
+        ctx.fillStyle = item.color === 'white' ? `rgba(114,174,255,${opacity + .25})` : `rgba(86,222,180,${opacity + .25})`;
+        ctx.fill();
+    });
+    if (countLabel) countLabel.textContent = `${aiHistory.length} ${aiHistory.length === 1 ? 'jugada representada' : 'jugadas representadas'}`;
+}
+
 function renderAIMoveHistory() {
     const el = document.getElementById('aiMoveHistory');
     if (!el) return;
@@ -12114,7 +12269,14 @@ function renderAIMoveHistory() {
     aiHistory.forEach(item => {
         const row = document.createElement('div');
         row.className = `history-move ai-history-move ai-${item.color}`;
-        row.innerHTML = `<span class="ai-history-player">${item.color === 'white' ? 'IA1' : 'IA2'}</span><span>${item.number}${item.color === 'black' ? '...' : '.'} ${item.text}</span>`;
+        const player = document.createElement('span');
+        player.className = 'ai-history-player';
+        player.textContent = item.color === 'white' ? 'Nébula' : 'Aurora';
+        const detail = document.createElement('span');
+        const from = item.from ? `${String.fromCharCode(97 + item.from.col)}${8 - item.from.row}` : '';
+        const to = item.to ? `${String.fromCharCode(97 + item.to.col)}${8 - item.to.row}` : '';
+        detail.textContent = `${item.number}${item.color === 'black' ? '...' : '.'} ${item.text}${from && to ? ` · ${from} → ${to}` : ''}`;
+        row.append(player, detail);
         el.appendChild(row);
     });
     el.scrollTop = el.scrollHeight;
@@ -12123,6 +12285,24 @@ function renderAIMoveHistory() {
 function updateAIGameMessage(text) {
     const el = document.getElementById('aiGameMessageText');
     if (el) el.textContent = text;
+}
+
+function updateAIPlayerStatus() {
+    const whiteStatus = document.getElementById('aiWhiteStatus');
+    const blackStatus = document.getElementById('aiBlackStatus');
+    const whiteMoves = document.getElementById('aiWhiteMoves');
+    const blackMoves = document.getElementById('aiBlackMoves');
+    const turnPill = document.getElementById('aiTurnPill');
+    const startButton = document.getElementById('startAIGameButton');
+    const whiteCount = aiHistory.filter(item => item.color === 'white').length;
+    const blackCount = aiHistory.filter(item => item.color === 'black').length;
+    if (whiteMoves) whiteMoves.textContent = whiteCount;
+    if (blackMoves) blackMoves.textContent = blackCount;
+    if (startButton) startButton.textContent = aiGameOver ? '↻ Nueva partida' : aiPlaying ? '⏸ Pausar partida' : aiHistory.length ? '▶ Reanudar partida' : '▶ Iniciar partida';
+    const stateText = aiGameOver ? 'Partida finalizada' : aiPlaying ? 'Calculando…' : aiHistory.length ? 'Partida pausada' : 'Lista para jugar';
+    if (whiteStatus) whiteStatus.textContent = aiPlaying && aiTurn === 'white' ? 'Calculando…' : stateText;
+    if (blackStatus) blackStatus.textContent = aiPlaying && aiTurn === 'black' ? 'Calculando…' : stateText;
+    if (turnPill) turnPill.textContent = aiGameOver ? 'Finalizada' : aiPlaying ? `Turno: ${aiTurn === 'white' ? 'Nébula' : 'Aurora'}` : aiHistory.length ? 'En pausa' : 'En espera';
 }
 
 function aiGameStep() {
@@ -12137,6 +12317,7 @@ function aiGameStep() {
         aiPlaying = false;
         const check = isKingInCheck(aiBoard, color);
         updateAIGameMessage(check ? `${color === 'white' ? 'IA1' : 'IA2'} recibió jaque mate.` : 'Tablas por ahogado.');
+        updateAIPlayerStatus();
         return;
     }
 
@@ -12156,12 +12337,15 @@ function aiGameStep() {
     aiHistory.push({
         number: aiGameMoveNumber,
         color,
-        text: notation
+        text: notation,
+        from: { ...move.from },
+        to: { ...move.to }
     });
     if (color === 'black') aiGameMoveNumber++;
 
     renderAIVsAIBoard();
     renderAIMoveHistory();
+    updateAIPlayerStatus();
 
     const opponent = color === 'white' ? 'black' : 'white';
     const opponentStatus = isKingInCheck(aiBoard, opponent)
@@ -12172,17 +12356,20 @@ function aiGameStep() {
         aiGameOver = true;
         aiPlaying = false;
         updateAIGameMessage(`${color === 'white' ? 'IA1' : 'IA2'} ganó por jaque mate.`);
+        updateAIPlayerStatus();
         return;
     }
     if (opponentStatus === 'stalemate') {
         aiGameOver = true;
         aiPlaying = false;
         updateAIGameMessage('Partida terminada en tablas.');
+        updateAIPlayerStatus();
         return;
     }
 
     aiTurn = opponent;
     updateAIGameMessage(`${aiTurn === 'white' ? 'IA1' : 'IA2'} está pensando...`);
+    updateAIPlayerStatus();
     aiMoveTimer = setTimeout(aiGameStep, getAIMoveDelay());
 }
 
@@ -12206,6 +12393,7 @@ function resetAIVsAI() {
     renderAIVsAIBoard();
     renderAIMoveHistory();
     updateAIGameMessage('Presioná iniciar para comenzar.');
+    updateAIPlayerStatus();
 }
 
 function startAIVsAIGame() {
@@ -12227,6 +12415,7 @@ function startAIVsAIGame() {
     renderAIVsAIBoard();
     renderAIMoveHistory();
     updateAIGameMessage('IA1 está pensando...');
+    updateAIPlayerStatus();
     aiMoveTimer = setTimeout(aiGameStep, 250);
 }
 
@@ -12248,12 +12437,14 @@ function initializeAIVsAIControls() {
             aiMoveTimer = null;
             button.innerHTML = '▶ Reanudar partida';
             updateAIGameMessage('Partida pausada.');
+            updateAIPlayerStatus();
             return;
         }
         if (aiHistory.length && !aiGameOver) {
             aiPlaying = true;
             button.innerHTML = '⏸ Pausar partida';
             updateAIGameMessage(`${aiTurn === 'white' ? 'IA1' : 'IA2'} está pensando...`);
+            updateAIPlayerStatus();
             aiMoveTimer = setTimeout(aiGameStep, 120);
             return;
         }
